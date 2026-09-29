@@ -31,7 +31,19 @@ The third quick-load option is a parallel SIMD computer:
 python3 lithography_voxel_lab.py --system parallel_system.json
 ```
 
-While the simulator is running, use **File → Load System from File…** or `Ctrl+O` to choose any system JSON. The File menu also contains quick loaders for the neural, quantum, and parallel examples, plus Save and Save As.
+The File menu also has **Load 8-bit Computer**, or load the complete BYTEFORGE system directly:
+
+```bash
+python3 lithography_voxel_lab.py --system 8bit_computer.json
+```
+
+It also includes **Load Turing Machine** for the tape-based TAPEWEAVE computer:
+
+```bash
+python3 lithography_voxel_lab.py --system turing_machine.json
+```
+
+While the simulator is running, use **File → Load System from File…** or `Ctrl+O` to choose any system JSON. The File menu also contains quick loaders for the neural, quantum, and parallel examples, plus an **Experimental Computers** submenu for topological braid, photonic wavefront, and hybrid quantum machines. Save and Save As are also available.
 
 It uses only Python's standard library and Tkinter. On Debian/Ubuntu, install Tkinter if it is missing:
 
@@ -67,7 +79,7 @@ The right-side **BUS MONITOR // LIVE** is the game's input/output screen. It sho
 
 The macro fab now has two construction views: press `T` for a square-cell top-down builder, or press `T` again to return to the isometric voxel view. Top-down building is snapped directly to the selected layer and is easier for large lithography layouts. The palette includes silicon, copper, resist, mask, dielectric, gold, N-type, P-type, and via blocks. Use `Q`/`E` to cycle blocks, number keys when available, and `PageUp`/`PageDown` to change layers.
 
-The simulator uses infinite construction stock by default: every material and particle gate can be placed repeatedly, and the HUD shows `∞` instead of a finite inventory. The lower-right framed **SCREEN OUTPUT // LIVE** panel is the actual simulator output surface; it receives the loaded system's output message, bus bitstream, field/layer totals, chip status, animated signal trace, and any JSON `equations` as rotating live equation examples.
+The simulator uses infinite construction stock by default: every material and particle gate can be placed repeatedly, and the HUD shows `∞` instead of a finite inventory. The lower-right framed **SCREEN OUTPUT // LIVE** panel is the in-game simulator output surface; it receives the loaded system's output message, bus bitstream, field/layer totals, chip status, animated signal trace, and any JSON `equations` as rotating live equation examples. Open **File → Open 512×512 Screen Output…** or press `F2` for a separate fixed-resolution graphical display canvas.
 
 Scroll the mouse wheel to cycle block types; in chip scale it cycles particle gates.
 
@@ -83,7 +95,7 @@ python3 lithography_voxel_lab.py --system savegame.json
 
 The material palette also includes quantum quasiparticles such as **phonon**, magnon, plasmon, hole, Cooper pair, Majorana, fluxon, ion, and dark photon. It also includes dedicated **Noise Source**, **Observer**, **Bayesian**, and **Consensus** materials. The neural example's **BAYESIAN OBSERVATION ENGINE** chip maps to `maze_flask.py`: its physical stages represent `observe`, `upward_pass`, `downward_pass`, `deep_obs`, and `plan_path`, and its screen output reports the posterior/deep-observation stream. The **MATERIAL GATE PRESET** dropdown above the build palette stamps complete multi-block assemblies such as CMOS Inverter, NAND Cell, Quantum H, CNOT Tile, Bell Pair, Ion Trap, Superconducting, and Photonic Mux. Choose `FREE BUILD` to return to single-block placement.
 
-Directional blocks now show restrained route arrows. Press `R` to rotate the placement direction through east, south, west, and north. Active conductive/quantum blocks pulse and glow with the live bus; inactive blocks remain dim with a static direction marker. The live packet is the primary notifier: its arrowhead follows the current bus segment and updates direction on every hop, including corners and diagonal transitions. Presets stamp every block with the selected orientation, and saved JSON preserves those directions.
+Directional blocks now show restrained route arrows. Press `R` to rotate the placement direction through east, south, west, and north. Active conductive/quantum blocks pulse and glow with the live bus; inactive blocks remain dim with a static direction marker. The live packet is the primary notifier: its arrowhead follows the current bus segment and updates direction on every hop, including corners and diagonal transitions. Presets stamp every block with the selected orientation, and saved JSON preserves those directions. JSON now writes readable voxel records with `direction` plus numeric `rotation` degrees (`0=east`, `90=south`, `180=west`, `270=north`); legacy five-item voxel arrays and direction strings still load. Chip `initial_gates` and saved `chip_logic.gates` accept the same `direction`/`rotation` fields, and gate arrows are visible in chip scale.
 
 ## Dual-computer server mode
 
@@ -105,11 +117,39 @@ A JSON system enables it with:
 
 The live program strip reports `DUAL-SERVER`, active core count, link type, latency, and transfer count. This is a deterministic simulator model of a high-speed interconnect, not an attempt to access real FireWire hardware.
 
+## Equation proposals
+
+Open **File → Propose Equation to Chip…** or press `Ctrl+E`. Choose a chip, enter a name and expression, then select **PROPOSE TO CHIP**. The simulator evaluates ordinary numeric expressions in a restricted sample environment, reports the answer and elapsed milliseconds in a popup, mirrors the report on the 512×512 output, and saves it in the system JSON under `equation_proposals`. Multiple statements are supported with semicolons or newlines, for example `m = 2; x = 0.75; y = m * x`; `let`, `var`, and `const` prefixes are accepted. Quantum/state notation is retained as a clearly labelled symbolic result.
+
 ## Programming the computer
 
 Open **File → Edit / Run LITHO-ISA Program…** or press `Ctrl+P`. The editor accepts source directly, with `RUN`, `STEP`, `STOP`, `RESET`, `.litho` load/save, and an **instructions/frame** speed control. The runtime executes many instructions per rendered frame, so increasing speed accelerates the computer without multiplying canvas redraw work.
 
 The core instruction set is: `CONST`, `MOV`, `ADD`, `SUB`, `MUL`, `DIV`, `CLAMP`, `INC`, `DEC`, `NOISE`, `OBSERVE`, `BAYES`, `HADAMARD`, `MEASURE`, `SEND`, `PRINT`, `WAIT`, `JMP`, `JNZ`, `JZ`, and `HALT`. The invented quantum operations are `CPHASE`, `SQRTSWAP`, `ISWAP`, `FREDKIN`, `PARITY`, `WEAKMEASURE`, `BRAID`, `MAGICSTATE`, `TELEPORT`, `DEPHASE`, and `QFT`. Lines beginning with `;` or `#` are comments. Registers are `R0` through `R15`.
+
+### LITHO-8 byte computer
+
+The `8bit_computer.json` system runs a deterministic 8-bit CPU mode. It has sixteen 8-bit registers, 256 bytes of addressable memory, an 8-bit stack pointer, `Z/N/C/V` flags, wrapping arithmetic, subroutine stack flow, and byte ports. Use `IMM8`/`MOV8`, `LOAD8`/`STORE8`, `ADD8`, `SUB8`, `AND8`, `OR8`, `XOR8`, `NOT8`, `INC8`, `DEC8`, `SHL8`, `SHR8`, `CMP8`, `PUSH8`, `POP8`, `IN8`, `OUT8`, `JZ8`, `JNZ8`, `JC8`, `JNC8`, `CALL`, and `RET`. Numeric constants accept decimal, hexadecimal (`0x2A`), binary (`0b101010`), or octal notation. Port `0` is connected to the graphical screen/bus output; `OUT8 0 R0` displays the byte as both hexadecimal and decimal.
+
+### Turing-machine computer
+
+The `turing_machine.json` system runs a deterministic single-tape Turing machine. Its JSON `program.turing` section defines the blank symbol, tape, head position, start/accept/reject states, and transition table. Each transition reads one symbol, writes one symbol, moves `L`, `R`, or `N`, and selects the next state. `Ctrl+P` opens the same RUN/STEP/STOP/RESET console; the 512×512 output shows the current tape window, head, state, step count, and accept/reject result.
+
+A transition has this shape:
+
+```json
+{"state": "q0", "read": "1", "write": "1", "move": "R", "next": "q0"}
+```
+
+Example:
+
+```text
+CONST R0 250
+CONST R1 10
+ADD8 R2 R0 R1    ; R2 = 0x04, C flag set
+STORE8 0x20 R2
+OUT8 0 R2
+```
 
 A JSON system can provide the program directly:
 
@@ -137,3 +177,13 @@ Examples include `CONTROLLED PHASE` (photon + fluxon junction), `SQRT SWAP` (exc
 ## Performance
 
 The renderer uses a separate fast input/simulation tick and a throttled canvas composition pass. The world redraws every other tick, while the sidebar graph refreshes less often. Movement is elapsed-time based and key auto-repeat is ignored, so slow frames no longer build a movement queue.
+
+## Experimental quantum computers
+
+Three additional systems use the invented quantum gates as complete computer designs:
+
+- [experimental_topological.json](/home/jdaj/Downloads/lithography_voxel_lab/experimental_topological.json) — Majorana zero-mode islands, anyon braid tracks, parity readout, and magic-state output.
+- [experimental_photonic.json](/home/jdaj/Downloads/lithography_voxel_lab/experimental_photonic.json) — photon/polariton waveguides, controlled phase, iSWAP, QFT, and teleportation.
+- [experimental_hybrid.json](/home/jdaj/Downloads/lithography_voxel_lab/experimental_hybrid.json) — superconducting Cooper-pair cells, anyon control, dephasing/noise lab, and hybrid output.
+
+Load them from **File → Experimental Computers**. Each system has its own lithography fields, chip queue, equations, four-core shared program, and FireWire-style link.

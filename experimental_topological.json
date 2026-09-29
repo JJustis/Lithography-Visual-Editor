@@ -1,0 +1,1059 @@
+{
+  "system": {
+    "name": "BRAIDCORE // TOPOLOGICAL COMPUTER",
+    "bus_name": "TOPO-BUS",
+    "clock_ghz": 6.4,
+    "architecture": "experimental quantum lithography computer"
+  },
+  "board": {
+    "width": 34,
+    "height": 22
+  },
+  "bus": {
+    "layers": {
+      "1": {
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            7,
+            6
+          ],
+          [
+            8,
+            6
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            10,
+            6
+          ],
+          [
+            11,
+            6
+          ],
+          [
+            12,
+            6
+          ],
+          [
+            13,
+            6
+          ],
+          [
+            14,
+            6
+          ],
+          [
+            15,
+            6
+          ],
+          [
+            16,
+            6
+          ],
+          [
+            17,
+            6
+          ],
+          [
+            18,
+            6
+          ],
+          [
+            19,
+            6
+          ],
+          [
+            20,
+            6
+          ],
+          [
+            21,
+            6
+          ],
+          [
+            22,
+            6
+          ],
+          [
+            23,
+            6
+          ],
+          [
+            24,
+            6
+          ],
+          [
+            25,
+            6
+          ],
+          [
+            26,
+            6
+          ],
+          [
+            27,
+            6
+          ],
+          [
+            28,
+            6
+          ],
+          [
+            28,
+            10
+          ],
+          [
+            28,
+            10
+          ],
+          [
+            27,
+            10
+          ],
+          [
+            26,
+            10
+          ],
+          [
+            25,
+            10
+          ],
+          [
+            24,
+            10
+          ],
+          [
+            23,
+            10
+          ],
+          [
+            22,
+            10
+          ],
+          [
+            21,
+            10
+          ],
+          [
+            20,
+            10
+          ],
+          [
+            19,
+            10
+          ],
+          [
+            18,
+            10
+          ],
+          [
+            17,
+            10
+          ],
+          [
+            16,
+            10
+          ],
+          [
+            15,
+            10
+          ],
+          [
+            14,
+            10
+          ],
+          [
+            13,
+            10
+          ],
+          [
+            12,
+            10
+          ],
+          [
+            11,
+            10
+          ],
+          [
+            10,
+            10
+          ],
+          [
+            9,
+            10
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            7,
+            10
+          ],
+          [
+            6,
+            10
+          ],
+          [
+            5,
+            10
+          ],
+          [
+            4,
+            10
+          ],
+          [
+            3,
+            10
+          ],
+          [
+            2,
+            10
+          ],
+          [
+            1,
+            10
+          ],
+          [
+            0,
+            10
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            2,
+            14
+          ],
+          [
+            3,
+            14
+          ],
+          [
+            4,
+            14
+          ],
+          [
+            5,
+            14
+          ],
+          [
+            6,
+            14
+          ],
+          [
+            7,
+            14
+          ],
+          [
+            8,
+            14
+          ],
+          [
+            9,
+            14
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            11,
+            14
+          ],
+          [
+            12,
+            14
+          ],
+          [
+            13,
+            14
+          ],
+          [
+            14,
+            14
+          ],
+          [
+            15,
+            14
+          ],
+          [
+            16,
+            14
+          ],
+          [
+            17,
+            14
+          ],
+          [
+            18,
+            14
+          ],
+          [
+            19,
+            14
+          ],
+          [
+            20,
+            14
+          ],
+          [
+            21,
+            14
+          ],
+          [
+            22,
+            14
+          ],
+          [
+            23,
+            14
+          ],
+          [
+            24,
+            14
+          ],
+          [
+            25,
+            14
+          ],
+          [
+            26,
+            14
+          ],
+          [
+            27,
+            14
+          ],
+          [
+            28,
+            14
+          ]
+        ],
+        "starting_traces": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ]
+        ]
+      },
+      "2": {
+        "path": [
+          [
+            14,
+            0
+          ],
+          [
+            14,
+            1
+          ],
+          [
+            14,
+            2
+          ],
+          [
+            14,
+            3
+          ],
+          [
+            14,
+            4
+          ],
+          [
+            14,
+            5
+          ],
+          [
+            14,
+            6
+          ],
+          [
+            14,
+            7
+          ],
+          [
+            14,
+            8
+          ],
+          [
+            14,
+            9
+          ],
+          [
+            14,
+            10
+          ],
+          [
+            14,
+            11
+          ],
+          [
+            14,
+            12
+          ],
+          [
+            14,
+            13
+          ],
+          [
+            14,
+            14
+          ],
+          [
+            14,
+            15
+          ],
+          [
+            14,
+            16
+          ],
+          [
+            14,
+            17
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            14,
+            19
+          ],
+          [
+            14,
+            20
+          ]
+        ],
+        "starting_traces": [
+          [
+            14,
+            3
+          ],
+          [
+            14,
+            4
+          ],
+          [
+            14,
+            5
+          ],
+          [
+            14,
+            6
+          ],
+          [
+            14,
+            7
+          ]
+        ]
+      },
+      "3": {
+        "path": [
+          [
+            4,
+            11
+          ],
+          [
+            5,
+            11
+          ],
+          [
+            6,
+            11
+          ],
+          [
+            7,
+            11
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            11
+          ],
+          [
+            10,
+            11
+          ],
+          [
+            11,
+            11
+          ],
+          [
+            12,
+            11
+          ],
+          [
+            13,
+            11
+          ],
+          [
+            14,
+            11
+          ],
+          [
+            15,
+            11
+          ],
+          [
+            16,
+            11
+          ],
+          [
+            17,
+            11
+          ],
+          [
+            18,
+            11
+          ],
+          [
+            19,
+            11
+          ],
+          [
+            20,
+            11
+          ],
+          [
+            21,
+            11
+          ],
+          [
+            22,
+            11
+          ],
+          [
+            23,
+            11
+          ],
+          [
+            24,
+            11
+          ],
+          [
+            25,
+            11
+          ],
+          [
+            26,
+            11
+          ]
+        ],
+        "starting_traces": [
+          [
+            12,
+            11
+          ],
+          [
+            13,
+            11
+          ],
+          [
+            14,
+            11
+          ],
+          [
+            15,
+            11
+          ]
+        ]
+      }
+    },
+    "connections": [
+      {
+        "cell": [
+          14,
+          6
+        ],
+        "layers": [
+          1,
+          2,
+          3
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          14,
+          10
+        ],
+        "layers": [
+          1,
+          2
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          14,
+          14
+        ],
+        "layers": [
+          1,
+          2,
+          3
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          26,
+          11
+        ],
+        "layers": [
+          2,
+          3
+        ],
+        "material": "copper"
+      }
+    ]
+  },
+  "lithography": {
+    "fields": [
+      {
+        "name": "MAJORANA BRAID FIELD",
+        "origin": [
+          0,
+          1
+        ],
+        "size": [
+          8,
+          6
+        ],
+        "layer": 1,
+        "pattern": "crosshatch",
+        "pitch": 2,
+        "tint": "#56e6dc",
+        "bus_taps": [
+          [
+            4,
+            6
+          ]
+        ]
+      },
+      {
+        "name": "ANYON MEMORY FIELD",
+        "origin": [
+          8,
+          1
+        ],
+        "size": [
+          8,
+          6
+        ],
+        "layer": 1,
+        "pattern": "checker",
+        "pitch": 2,
+        "tint": "#b6ff8d",
+        "bus_taps": [
+          [
+            12,
+            6
+          ]
+        ]
+      },
+      {
+        "name": "TOPOLOGICAL READOUT",
+        "origin": [
+          17,
+          7
+        ],
+        "size": [
+          13,
+          7
+        ],
+        "layer": 3,
+        "pattern": "grid",
+        "pitch": 3,
+        "tint": "#ffe76b",
+        "bus_taps": [
+          [
+            20,
+            11
+          ],
+          [
+            26,
+            11
+          ]
+        ]
+      }
+    ]
+  },
+  "equations": [
+    {
+      "name": "BRAID",
+      "expression": "UᵢUⱼUᵢ = UⱼUᵢUⱼ"
+    },
+    {
+      "name": "PARITY",
+      "expression": "P = (-1)^(n₁+n₂)"
+    },
+    {
+      "name": "MAGIC STATE",
+      "expression": "|A⟩ = T|+⟩"
+    }
+  ],
+  "output": {
+    "screen_name": "TOPOLOGICAL OUTPUT // BRAID LIVE",
+    "idle_message": "Majorana braid computation streaming"
+  },
+  "infinite_supply": true,
+  "boot_working": true,
+  "cluster": {
+    "enabled": true,
+    "shared_memory": true,
+    "link": {
+      "type": "firewire",
+      "name": "TOPO-FIRELINK",
+      "latency_ticks": 1,
+      "bandwidth": "experimental-shared-bus"
+    },
+    "computers": [
+      {
+        "name": "TOPO-A",
+        "role": "experiment-source",
+        "cores": 2
+      },
+      {
+        "name": "TOPO-B",
+        "role": "experiment-readout",
+        "cores": 2
+      }
+    ]
+  },
+  "program": {
+    "language": "LITHO-ISA",
+    "auto_start": true,
+    "speed": 36,
+    "source": "; TOPOLOGICAL BRAID COMPUTER\n; Four workers share this program and exchange braid readout values.\nCONST R1 0.50\nLOOP:\nLANE R0\nMAGICSTATE R2 R1\nBRAID R3 R2 R0\nPARITY R4 R3 R1\nWEAKMEASURE R5 R4 0.65\nSEND R5\nPRINT \"BRAID\" R0 R5\nWAIT 2\nJMP LOOP\n"
+  },
+  "chips": [
+    {
+      "name": "BRAID ENGINE",
+      "code": "T-01",
+      "anchor": [
+        1,
+        2
+      ],
+      "pattern": {
+        "0,0": "majorana",
+        "1,0": "anyon",
+        "2,0": "majorana",
+        "0,1": "fluxon",
+        "1,1": "quantum",
+        "2,1": "fluxon",
+        "0,2": "cooper_pair",
+        "1,2": "via",
+        "2,2": "silicon"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 3,
+        "south": 1,
+        "west": 2
+      },
+      "gate_target": 6,
+      "tint": "#56e6dc",
+      "output": "Majorana braid unitary emitted",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "braid"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "magic_state"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "controlled_phase"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "ANYON MEMORY",
+      "code": "T-02",
+      "anchor": [
+        9,
+        2
+      ],
+      "pattern": {
+        "0,0": "anyon",
+        "1,0": "majorana",
+        "2,0": "anyon",
+        "0,1": "dark_photon",
+        "1,1": "fluxon",
+        "2,1": "dark_photon",
+        "0,2": "cooper_pair",
+        "1,2": "via",
+        "2,2": "cooper_pair"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 2,
+        "south": 2,
+        "west": 2
+      },
+      "gate_target": 6,
+      "tint": "#b6ff8d",
+      "output": "topological memory state preserved",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "sqrt_swap"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "braid"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "dephase"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "PARITY READOUT",
+      "code": "T-03",
+      "anchor": [
+        18,
+        8
+      ],
+      "pattern": {
+        "0,0": "observer",
+        "1,0": "neutrino",
+        "2,0": "observer",
+        "0,1": "signal",
+        "1,1": "quantum",
+        "2,1": "signal",
+        "0,2": "gold",
+        "1,2": "via",
+        "2,2": "gold"
+      },
+      "face_slots": {
+        "north": 3,
+        "east": 2,
+        "south": 1,
+        "west": 3
+      },
+      "gate_target": 6,
+      "tint": "#ffe76b",
+      "output": "braid parity measured",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "parity"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "weak_measure"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "measure"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "MAGIC OUTPUT",
+      "code": "T-04",
+      "anchor": [
+        26,
+        8
+      ],
+      "pattern": {
+        "0,0": "majorana",
+        "1,0": "qubit",
+        "2,0": "photon",
+        "0,1": "signal",
+        "1,1": "polariton",
+        "2,1": "signal",
+        "0,2": "gold",
+        "1,2": "via",
+        "2,2": "gold"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 2,
+        "south": 2,
+        "west": 2
+      },
+      "gate_target": 6,
+      "tint": "#d89aff",
+      "output": "non-Clifford state delivered to screen",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "magic_state"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "teleport"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "qft"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    }
+  ]
+}

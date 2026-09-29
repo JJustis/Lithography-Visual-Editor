@@ -1,0 +1,1059 @@
+{
+  "system": {
+    "name": "LUMEN // PHOTONIC EXPERIMENTAL COMPUTER",
+    "bus_name": "LUMEN-BUS",
+    "clock_ghz": 6.4,
+    "architecture": "experimental quantum lithography computer"
+  },
+  "board": {
+    "width": 34,
+    "height": 22
+  },
+  "bus": {
+    "layers": {
+      "1": {
+        "path": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            7,
+            6
+          ],
+          [
+            8,
+            6
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            10,
+            6
+          ],
+          [
+            11,
+            6
+          ],
+          [
+            12,
+            6
+          ],
+          [
+            13,
+            6
+          ],
+          [
+            14,
+            6
+          ],
+          [
+            15,
+            6
+          ],
+          [
+            16,
+            6
+          ],
+          [
+            17,
+            6
+          ],
+          [
+            18,
+            6
+          ],
+          [
+            19,
+            6
+          ],
+          [
+            20,
+            6
+          ],
+          [
+            21,
+            6
+          ],
+          [
+            22,
+            6
+          ],
+          [
+            23,
+            6
+          ],
+          [
+            24,
+            6
+          ],
+          [
+            25,
+            6
+          ],
+          [
+            26,
+            6
+          ],
+          [
+            27,
+            6
+          ],
+          [
+            28,
+            6
+          ],
+          [
+            28,
+            10
+          ],
+          [
+            28,
+            10
+          ],
+          [
+            27,
+            10
+          ],
+          [
+            26,
+            10
+          ],
+          [
+            25,
+            10
+          ],
+          [
+            24,
+            10
+          ],
+          [
+            23,
+            10
+          ],
+          [
+            22,
+            10
+          ],
+          [
+            21,
+            10
+          ],
+          [
+            20,
+            10
+          ],
+          [
+            19,
+            10
+          ],
+          [
+            18,
+            10
+          ],
+          [
+            17,
+            10
+          ],
+          [
+            16,
+            10
+          ],
+          [
+            15,
+            10
+          ],
+          [
+            14,
+            10
+          ],
+          [
+            13,
+            10
+          ],
+          [
+            12,
+            10
+          ],
+          [
+            11,
+            10
+          ],
+          [
+            10,
+            10
+          ],
+          [
+            9,
+            10
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            7,
+            10
+          ],
+          [
+            6,
+            10
+          ],
+          [
+            5,
+            10
+          ],
+          [
+            4,
+            10
+          ],
+          [
+            3,
+            10
+          ],
+          [
+            2,
+            10
+          ],
+          [
+            1,
+            10
+          ],
+          [
+            0,
+            10
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            0,
+            14
+          ],
+          [
+            1,
+            14
+          ],
+          [
+            2,
+            14
+          ],
+          [
+            3,
+            14
+          ],
+          [
+            4,
+            14
+          ],
+          [
+            5,
+            14
+          ],
+          [
+            6,
+            14
+          ],
+          [
+            7,
+            14
+          ],
+          [
+            8,
+            14
+          ],
+          [
+            9,
+            14
+          ],
+          [
+            10,
+            14
+          ],
+          [
+            11,
+            14
+          ],
+          [
+            12,
+            14
+          ],
+          [
+            13,
+            14
+          ],
+          [
+            14,
+            14
+          ],
+          [
+            15,
+            14
+          ],
+          [
+            16,
+            14
+          ],
+          [
+            17,
+            14
+          ],
+          [
+            18,
+            14
+          ],
+          [
+            19,
+            14
+          ],
+          [
+            20,
+            14
+          ],
+          [
+            21,
+            14
+          ],
+          [
+            22,
+            14
+          ],
+          [
+            23,
+            14
+          ],
+          [
+            24,
+            14
+          ],
+          [
+            25,
+            14
+          ],
+          [
+            26,
+            14
+          ],
+          [
+            27,
+            14
+          ],
+          [
+            28,
+            14
+          ]
+        ],
+        "starting_traces": [
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ]
+        ]
+      },
+      "2": {
+        "path": [
+          [
+            14,
+            0
+          ],
+          [
+            14,
+            1
+          ],
+          [
+            14,
+            2
+          ],
+          [
+            14,
+            3
+          ],
+          [
+            14,
+            4
+          ],
+          [
+            14,
+            5
+          ],
+          [
+            14,
+            6
+          ],
+          [
+            14,
+            7
+          ],
+          [
+            14,
+            8
+          ],
+          [
+            14,
+            9
+          ],
+          [
+            14,
+            10
+          ],
+          [
+            14,
+            11
+          ],
+          [
+            14,
+            12
+          ],
+          [
+            14,
+            13
+          ],
+          [
+            14,
+            14
+          ],
+          [
+            14,
+            15
+          ],
+          [
+            14,
+            16
+          ],
+          [
+            14,
+            17
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            14,
+            19
+          ],
+          [
+            14,
+            20
+          ]
+        ],
+        "starting_traces": [
+          [
+            14,
+            3
+          ],
+          [
+            14,
+            4
+          ],
+          [
+            14,
+            5
+          ],
+          [
+            14,
+            6
+          ],
+          [
+            14,
+            7
+          ]
+        ]
+      },
+      "3": {
+        "path": [
+          [
+            4,
+            11
+          ],
+          [
+            5,
+            11
+          ],
+          [
+            6,
+            11
+          ],
+          [
+            7,
+            11
+          ],
+          [
+            8,
+            11
+          ],
+          [
+            9,
+            11
+          ],
+          [
+            10,
+            11
+          ],
+          [
+            11,
+            11
+          ],
+          [
+            12,
+            11
+          ],
+          [
+            13,
+            11
+          ],
+          [
+            14,
+            11
+          ],
+          [
+            15,
+            11
+          ],
+          [
+            16,
+            11
+          ],
+          [
+            17,
+            11
+          ],
+          [
+            18,
+            11
+          ],
+          [
+            19,
+            11
+          ],
+          [
+            20,
+            11
+          ],
+          [
+            21,
+            11
+          ],
+          [
+            22,
+            11
+          ],
+          [
+            23,
+            11
+          ],
+          [
+            24,
+            11
+          ],
+          [
+            25,
+            11
+          ],
+          [
+            26,
+            11
+          ]
+        ],
+        "starting_traces": [
+          [
+            12,
+            11
+          ],
+          [
+            13,
+            11
+          ],
+          [
+            14,
+            11
+          ],
+          [
+            15,
+            11
+          ]
+        ]
+      }
+    },
+    "connections": [
+      {
+        "cell": [
+          14,
+          6
+        ],
+        "layers": [
+          1,
+          2,
+          3
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          14,
+          10
+        ],
+        "layers": [
+          1,
+          2
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          14,
+          14
+        ],
+        "layers": [
+          1,
+          2,
+          3
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          26,
+          11
+        ],
+        "layers": [
+          2,
+          3
+        ],
+        "material": "copper"
+      }
+    ]
+  },
+  "lithography": {
+    "fields": [
+      {
+        "name": "PHOTON WAVEGUIDE ARRAY",
+        "origin": [
+          0,
+          1
+        ],
+        "size": [
+          8,
+          6
+        ],
+        "layer": 1,
+        "pattern": "grid",
+        "pitch": 2,
+        "tint": "#ff6f91",
+        "bus_taps": [
+          [
+            4,
+            6
+          ]
+        ]
+      },
+      {
+        "name": "POLARITON PHASE ARRAY",
+        "origin": [
+          8,
+          1
+        ],
+        "size": [
+          8,
+          6
+        ],
+        "layer": 1,
+        "pattern": "crosshatch",
+        "pitch": 2,
+        "tint": "#84baff",
+        "bus_taps": [
+          [
+            12,
+            6
+          ]
+        ]
+      },
+      {
+        "name": "SPECTRAL FOURIER PLANE",
+        "origin": [
+          17,
+          7
+        ],
+        "size": [
+          13,
+          7
+        ],
+        "layer": 2,
+        "pattern": "checker",
+        "pitch": 2,
+        "tint": "#b98cff",
+        "bus_taps": [
+          [
+            20,
+            11
+          ],
+          [
+            26,
+            11
+          ]
+        ]
+      }
+    ]
+  },
+  "equations": [
+    {
+      "name": "iSWAP",
+      "expression": "|01⟩ → i|10⟩"
+    },
+    {
+      "name": "QFT",
+      "expression": "|x⟩ → 1/√N Σᵧ e^(2πixy/N)|y⟩"
+    },
+    {
+      "name": "TELEPORT",
+      "expression": "|ψ⟩₃ = XᵐZⁿ|ψ⟩"
+    }
+  ],
+  "output": {
+    "screen_name": "PHOTONIC OUTPUT // WAVEFRONT LIVE",
+    "idle_message": "photonic phase lanes streaming"
+  },
+  "infinite_supply": true,
+  "boot_working": true,
+  "cluster": {
+    "enabled": true,
+    "shared_memory": true,
+    "link": {
+      "type": "firewire",
+      "name": "LUMEN-FIRELINK",
+      "latency_ticks": 1,
+      "bandwidth": "experimental-shared-bus"
+    },
+    "computers": [
+      {
+        "name": "LUMEN-A",
+        "role": "experiment-source",
+        "cores": 2
+      },
+      {
+        "name": "LUMEN-B",
+        "role": "experiment-readout",
+        "cores": 2
+      }
+    ]
+  },
+  "program": {
+    "language": "LITHO-ISA",
+    "auto_start": true,
+    "speed": 36,
+    "source": "; PHOTONIC WAVEFRONT COMPUTER\n; Phase, exchange, QFT, and teleport are modeled as signal transforms.\nCONST R1 0.25\nLOOP:\nLANE R0\nCPHASE R2 R1 0.785398\nISWAP R3 R2 R0\nQFT R4 R3\nTELEPORT R5 R4 R0\nDEPHASE R6 R5 0.12\nSEND R6\nPRINT \"PHOTON\" R0 R6\nWAIT 2\nJMP LOOP\n"
+  },
+  "chips": [
+    {
+      "name": "PHOTONIC PHASE ARRAY",
+      "code": "L-01",
+      "anchor": [
+        1,
+        2
+      ],
+      "pattern": {
+        "0,0": "photon",
+        "1,0": "polariton",
+        "2,0": "photon",
+        "0,1": "gold",
+        "1,1": "quantum",
+        "2,1": "gold",
+        "0,2": "silicon",
+        "1,2": "via",
+        "2,2": "plasmon"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 3,
+        "south": 2,
+        "west": 1
+      },
+      "gate_target": 6,
+      "tint": "#ff6f91",
+      "output": "controlled optical phase emitted",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "controlled_phase"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "iswap"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "qft"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "WAVEFRONT SWAP",
+      "code": "L-02",
+      "anchor": [
+        9,
+        2
+      ],
+      "pattern": {
+        "0,0": "photon",
+        "1,0": "exciton",
+        "2,0": "photon",
+        "0,1": "plasmon",
+        "1,1": "polariton",
+        "2,1": "plasmon",
+        "0,2": "gold",
+        "1,2": "via",
+        "2,2": "gold"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 2,
+        "south": 2,
+        "west": 2
+      },
+      "gate_target": 6,
+      "tint": "#84baff",
+      "output": "iSWAP wavefront exchanged",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "iswap"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "sqrt_swap"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "controlled_phase"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "PHOTONIC TELEPORTER",
+      "code": "L-03",
+      "anchor": [
+        18,
+        8
+      ],
+      "pattern": {
+        "0,0": "photon",
+        "1,0": "qubit",
+        "2,0": "photon",
+        "0,1": "cooper_pair",
+        "1,1": "quantum",
+        "2,1": "cooper_pair",
+        "0,2": "gold",
+        "1,2": "via",
+        "2,2": "gold"
+      },
+      "face_slots": {
+        "north": 3,
+        "east": 2,
+        "south": 2,
+        "west": 2
+      },
+      "gate_target": 6,
+      "tint": "#f2a1ff",
+      "output": "photonic state teleported",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "bell"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "teleport"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "weak_measure"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "SPECTRUM SCREEN",
+      "code": "L-04",
+      "anchor": [
+        26,
+        8
+      ],
+      "pattern": {
+        "0,0": "polariton",
+        "1,0": "plasmon",
+        "2,0": "polariton",
+        "0,1": "signal",
+        "1,1": "quantum",
+        "2,1": "signal",
+        "0,2": "clock",
+        "1,2": "via",
+        "2,2": "clock"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 2,
+        "south": 1,
+        "west": 3
+      },
+      "gate_target": 6,
+      "tint": "#b98cff",
+      "output": "QFT spectrum rendered",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "qft"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "dephase"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "measure"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    }
+  ]
+}

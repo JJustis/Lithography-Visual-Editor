@@ -13,6 +13,7 @@ The --self-test flag exercises the board/circuit model without opening a UI.
 
 from __future__ import annotations
 
+import ast
 import json
 import math
 import random
@@ -177,6 +178,33 @@ MATERIAL_ORDER = [
 ]
 
 DIRECTIONS = ["east", "south", "west", "north"]
+ROTATION_DEGREES = {"east": 0, "south": 90, "west": 180, "north": 270}
+
+def normalize_direction(value: Any, default: str = "east", allow_up: bool = False) -> str:
+    """Accept legacy direction names and JSON rotation degrees."""
+    if isinstance(value, str):
+        candidate = value.strip().lower()
+        if candidate in DIRECTIONS or (allow_up and candidate == "up"):
+            return candidate
+        try:
+            value = float(candidate.rstrip("deg°"))
+        except ValueError:
+            return default
+    if isinstance(value, (int, float)):
+        degrees = int(round(float(value))) % 360
+        nearest = min(
+            ROTATION_DEGREES,
+            key=lambda direction: min(
+                abs(ROTATION_DEGREES[direction] - degrees),
+                360 - abs(ROTATION_DEGREES[direction] - degrees),
+            ),
+        )
+        return nearest
+    return default
+
+def direction_rotation(direction: str) -> int:
+    return ROTATION_DEGREES.get(normalize_direction(direction), 0)
+
 DIRECTIONAL_BLOCKS = set(MATERIAL_ORDER) - {"pcb", "dielectric", "resist", "mask", "ground"}
 ACTIVE_BLOCKS = DIRECTIONAL_BLOCKS - {"gold", "silicon", "n_type", "p_type"}
 
@@ -278,6 +306,7 @@ class ChipSpec:
 class ChipLogic:
     gates: Dict[GridCell, str]
     ports: Dict[str, List[bool]]
+    gate_directions: Dict[GridCell, str]
 
     @property
     def connected_ports(self) -> int:
@@ -537,7 +566,29 @@ class LabModel:
         connection_layers = [int(layer) for item in bus_meta.get("connections", []) if isinstance(item, dict) for layer in item.get("layers", [1])]
         self.max_layer = max([1, *self.layer_bus_cells.keys(), *connection_layers])
         self.output_config = self.config.get("output", {}) if isinstance(self.config.get("output", {}), dict) else {}
-        self.equations = self.config.get("equations", []) if isinstance(self.config.get("equations", []), list) else []
+        configured_equations = self.config.get("equations", []) if isinstance(self.config.get("equations", []), list) else []
+        self.equations = list(configured_equations)
+        self.equation_proposals: List[Dict[str, str]] = []
+        raw_proposals = self.config.get("equation_proposals", [])
+        if isinstance(raw_proposals, list):
+            for raw_proposal in raw_proposals:
+                if not isinstance(raw_proposal, dict):
+                    continue
+                proposal = {
+                    "name": str(raw_proposal.get("name", "EQUATION PROPOSAL")),
+                    "expression": str(raw_proposal.get("expression", "")).strip(),
+                    "chip": str(raw_proposal.get("chip", "")),
+                    "status": str(raw_proposal.get("status", "PROPOSED")),
+                }
+                if "answer" in raw_proposal:
+                    proposal["answer"] = str(raw_proposal.get("answer", ""))
+                if "elapsed_ms" in raw_proposal:
+                    proposal["elapsed_ms"] = str(raw_proposal.get("elapsed_ms", ""))
+                if not proposal["expression"]:
+                    continue
+                self.equation_proposals.append(proposal)
+                if proposal not in self.equations:
+                    self.equations.append(proposal)
         cluster_config = self.config.get("cluster", {}) if isinstance(self.config.get("cluster", {}), dict) else {}
         link_config = cluster_config.get("link", {}) if isinstance(cluster_config.get("link", {}), dict) else {}
         self.cluster_enabled = bool(cluster_config.get("enabled", False))
@@ -582,6 +633,7 @@ class LabModel:
             chip.code: ChipLogic(
                 gates={},
                 ports={face: [False] * count for face, count in chip.face_slots.items()},
+                gate_directions={},
             )
             for chip in CHIPS
         }
@@ -590,6 +642,23 @@ class LabModel:
         self.completed_runs = 0
         self.last_event = "FAB READY // load a pattern"
         self.program_source = ""
+        self.program_architecture = "LITHO-ISA"
+        self.program_memory_size = 256
+        self.program_memory_image: List[int] = [0] * self.program_memory_size
+        self.program_memory: List[int] = list(self.program_memory_image)
+        self.program_flags: Dict[str, bool] = {"Z": False, "N": False, "C": False, "V": False}
+        self.program_stack_pointer = 0xFF
+        self.program_ports: Dict[int, int] = {}
+        self.turing_blank = "_"
+        self.turing_start_state = "q0"
+        self.turing_state = self.turing_start_state
+        self.turing_head = 0
+        self.turing_tape_image: Dict[int, str] = {}
+        self.turing_tape: Dict[int, str] = {}
+        self.turing_transitions: Dict[Tuple[str, str], Dict[str, str]] = {}
+        self.turing_accept_states = {"ACCEPT"}
+        self.turing_reject_states = {"REJECT"}
+        self.turing_steps = 0
         self.program_instructions: List[Tuple[str, List[str], int, str]] = []
         self.program_labels: Dict[str, int] = {}
         self.program_pc = 0
@@ -612,6 +681,78 @@ class LabModel:
         program_config = self.config.get("program", {})
         if not isinstance(program_config, dict):
             program_config = {}
+        architecture = str(program_config.get("architecture", "LITHO-ISA")).upper().replace(" ", "")
+        if architecture in {"TURING", "TURING-MACHINE", "TM"}:
+            self.program_architecture = "TURING"
+        elif architecture in {"8BIT", "8-BIT", "LITHO8", "LITHO-8"}:
+            self.program_architecture = "LITHO-8"
+        else:
+            self.program_architecture = "LITHO-ISA"
+        self.program_memory_size = 256 if self.program_architecture == "LITHO-8" else max(1, min(65536, int(program_config.get("memory_size", 256))))
+        self.program_memory_image = [0] * self.program_memory_size
+        raw_memory = program_config.get("memory", {})
+        if isinstance(raw_memory, dict):
+            memory_items = raw_memory.items()
+        elif isinstance(raw_memory, list):
+            memory_items = enumerate(raw_memory)
+        else:
+            memory_items = []
+        for raw_address, raw_value in memory_items:
+            try:
+                address = int(str(raw_address), 0)
+                if 0 <= address < self.program_memory_size:
+                    self.program_memory_image[address] = int(raw_value) & 0xFF
+            except (TypeError, ValueError):
+                continue
+        self.program_memory = list(self.program_memory_image)
+        self.program_ports = {}
+        raw_ports = program_config.get("ports", {})
+        if isinstance(raw_ports, dict):
+            for raw_port, raw_value in raw_ports.items():
+                try:
+                    port = int(str(raw_port), 0)
+                    if 0 <= port <= 0xFF:
+                        self.program_ports[port] = int(raw_value) & 0xFF
+                except (TypeError, ValueError):
+                    continue
+        turing_config = program_config.get("turing", {}) if isinstance(program_config.get("turing", {}), dict) else {}
+        self.turing_blank = str(turing_config.get("blank", "_"))[:1] or "_"
+        self.turing_start_state = str(turing_config.get("start_state", "q0"))
+        self.turing_state = self.turing_start_state
+        self.turing_head = int(turing_config.get("head", 0))
+        self.turing_accept_states = {str(value) for value in turing_config.get("accept_states", ["ACCEPT"])}
+        self.turing_reject_states = {str(value) for value in turing_config.get("reject_states", ["REJECT"])}
+        self.turing_tape_image = {}
+        raw_tape = turing_config.get("tape", "")
+        if isinstance(raw_tape, str):
+            self.turing_tape_image = {index: symbol for index, symbol in enumerate(raw_tape)}
+        elif isinstance(raw_tape, list):
+            self.turing_tape_image = {index: str(symbol)[:1] or self.turing_blank for index, symbol in enumerate(raw_tape)}
+        elif isinstance(raw_tape, dict):
+            for raw_position, raw_symbol in raw_tape.items():
+                try:
+                    self.turing_tape_image[int(str(raw_position), 0)] = str(raw_symbol)[:1] or self.turing_blank
+                except (TypeError, ValueError):
+                    continue
+        self.turing_transitions = {}
+        raw_transitions = turing_config.get("transitions", [])
+        if isinstance(raw_transitions, list):
+            transition_items = raw_transitions
+        else:
+            transition_items = []
+        for raw_transition in transition_items:
+            if not isinstance(raw_transition, dict):
+                continue
+            state = str(raw_transition.get("state", ""))
+            read = str(raw_transition.get("read", self.turing_blank))[:1] or self.turing_blank
+            if not state:
+                continue
+            self.turing_transitions[(state, read)] = {
+                "write": str(raw_transition.get("write", read))[:1] or self.turing_blank,
+                "move": str(raw_transition.get("move", "N")).upper(),
+                "next": str(raw_transition.get("next", state)),
+            }
+        self.turing_tape = dict(self.turing_tape_image)
         self.program_speed = min(512, max(1, int(program_config.get("speed", 24))))
         source = str(program_config.get("source", DEFAULT_PROGRAM_SOURCE))
         self.load_program(source, announce=False)
@@ -653,10 +794,12 @@ class LabModel:
                     continue
                 slot = raw_gate.get("slot", raw_gate.get("cell"))
                 gate = str(raw_gate.get("gate", ""))
+                gate_direction = normalize_direction(raw_gate.get("direction", raw_gate.get("rotation", "east")))
                 if isinstance(slot, list) and len(slot) == 2 and gate in GATE_TYPES:
                     cell = int(slot[0]), int(slot[1])
                     if 0 <= cell[0] < 9 and 0 <= cell[1] < 6:
                         logic.gates[cell] = gate
+                        logic.gate_directions[cell] = gate_direction
                         if not self.infinite_supply:
                             self.gate_inventory[gate] = max(0, self.gate_inventory[gate] - 1)
             for raw_port in raw_chip.get("connected_ports", []):
@@ -727,13 +870,29 @@ class LabModel:
         self.completed_runs = len(CHIPS)
         self.last_event = "BOOT PASS // default computer online // screen output streaming"
 
+    @property
+    def is_8bit(self) -> bool:
+        return self.program_architecture == "LITHO-8"
+
+    @property
+    def is_turing(self) -> bool:
+        return self.program_architecture == "TURING"
+
     def _new_program_worker(self, computer: str, name: str, core: int) -> Dict[str, Any]:
         return {
             "computer": computer,
             "name": name,
             "core": core,
             "pc": 0,
-            "registers": {f"R{index}": 0.0 for index in range(16)},
+            "registers": {f"R{index}": 0 if self.is_8bit else 0.0 for index in range(16)},
+            "memory": list(self.program_memory_image),
+            "flags": {"Z": False, "N": False, "C": False, "V": False},
+            "sp": 0xFF,
+            "ports": dict(self.program_ports),
+            "tape": dict(self.turing_tape_image),
+            "tm_head": self.turing_head,
+            "tm_state": self.turing_start_state,
+            "tm_steps": 0,
             "running": False,
             "halted": False,
             "wait": 0,
@@ -757,6 +916,14 @@ class LabModel:
             "clock": self.program_clock,
             "bus_value": self.program_bus_value,
             "input_value": self.program_input_value,
+            "memory": list(self.program_memory),
+            "flags": dict(self.program_flags),
+            "sp": self.program_stack_pointer,
+            "ports": dict(self.program_ports),
+            "tape": dict(self.turing_tape),
+            "tm_head": self.turing_head,
+            "tm_state": self.turing_state,
+            "tm_steps": self.turing_steps,
             "output": list(self.program_output),
             "error": self.program_error,
         })
@@ -777,6 +944,14 @@ class LabModel:
         self.program_clock = int(worker["clock"])
         self.program_bus_value = float(worker["bus_value"])
         self.program_input_value = float(worker["input_value"])
+        self.program_memory = [int(value) & 0xFF for value in worker.get("memory", self.program_memory_image)]
+        self.program_flags = {name: bool(worker.get("flags", {}).get(name, False)) for name in ("Z", "N", "C", "V")}
+        self.program_stack_pointer = int(worker.get("sp", 0xFF)) & 0xFF
+        self.program_ports = {int(address): int(value) & 0xFF for address, value in worker.get("ports", {}).items()}
+        self.turing_tape = {int(position): str(symbol)[:1] or self.turing_blank for position, symbol in worker.get("tape", self.turing_tape_image).items()}
+        self.turing_head = int(worker.get("tm_head", self.turing_head))
+        self.turing_state = str(worker.get("tm_state", self.turing_start_state))
+        self.turing_steps = int(worker.get("tm_steps", 0))
         self.program_output = list(worker["output"])
         self.program_error = str(worker["error"])
 
@@ -845,9 +1020,39 @@ class LabModel:
         if text.upper().lstrip("$") in self.program_registers:
             return self.program_registers[text.upper().lstrip("$")]
         try:
+            if text.lower().startswith(("0x", "0b", "0o")):
+                return float(int(text, 0))
             return float(text)
         except ValueError:
             raise ValueError(f"expected a number or register, got {token}") from None
+
+    def _program_address(self, token: str) -> int:
+        return int(self._program_value(token)) & 0xFF
+
+    def _program_set_register(self, register: str, value: float, update_flags: bool = False) -> int | float:
+        if not self.is_8bit:
+            self.program_registers[register] = float(value)
+            return self.program_registers[register]
+        result = int(round(value)) & 0xFF
+        self.program_registers[register] = result
+        if update_flags:
+            self.program_flags["Z"] = result == 0
+            self.program_flags["N"] = bool(result & 0x80)
+        return result
+
+    def _program_set_logic_flags(self, result: int) -> None:
+        result &= 0xFF
+        self.program_flags["Z"] = result == 0
+        self.program_flags["N"] = bool(result & 0x80)
+        self.program_flags["V"] = False
+
+    def _program_push8(self, value: int) -> None:
+        self.program_memory[self.program_stack_pointer] = int(value) & 0xFF
+        self.program_stack_pointer = (self.program_stack_pointer - 1) & 0xFF
+
+    def _program_pop8(self) -> int:
+        self.program_stack_pointer = (self.program_stack_pointer + 1) & 0xFF
+        return int(self.program_memory[self.program_stack_pointer]) & 0xFF
 
     def _compile_program(self, source: str) -> Tuple[List[Tuple[str, List[str], int, str]], Dict[str, int]]:
         instructions: List[Tuple[str, List[str], int, str]] = []
@@ -858,6 +1063,9 @@ class LabModel:
             "CPHASE", "SQRTSWAP", "ISWAP", "FREDKIN", "PARITY", "WEAKMEASURE", "BRAID",
             "MAGICSTATE", "TELEPORT", "DEPHASE", "QFT", "LANE", "CORE", "MEASURE",
             "INPUT", "SEND", "OUTPUT", "PRINT", "WAIT", "JMP", "JNZ", "JZ", "HALT",
+            "IMM8", "MOV8", "LOAD8", "STORE8", "ADD8", "SUB8", "AND8", "OR8", "XOR8",
+            "NOT8", "INC8", "DEC8", "SHL8", "SHR8", "CMP8", "PUSH8", "POP8",
+            "IN8", "OUT8", "JZ8", "JNZ8", "JC8", "JNC8", "CALL", "RET",
         }
         for line_number, original in enumerate(str(source).splitlines(), 1):
             line = original.strip()
@@ -886,20 +1094,27 @@ class LabModel:
                 raise ValueError(f"LITHO-ISA line {line_number}: unknown opcode {opcode}")
             instructions.append((opcode, tokens[1:], line_number, original.strip()))
         for opcode, args, line_number, _ in instructions:
-            if opcode in {"JMP", "JNZ", "JZ"}:
+            if opcode in {"JMP", "JNZ", "JZ", "JZ8", "JNZ8", "JC8", "JNC8", "CALL"}:
                 label = args[-1].upper() if args else ""
                 if label not in labels:
                     raise ValueError(f"LITHO-ISA line {line_number}: unknown label {label or '<missing>'}")
         return instructions, labels
 
     def load_program(self, source: str, announce: bool = True) -> None:
-        instructions, labels = self._compile_program(source)
         self.program_source = str(source)
+        if self.is_turing:
+            self.program_instructions = []
+            self.program_labels = {}
+            self.reset_program(announce=False)
+            if announce:
+                self.last_event = f"PROGRAM LOAD // {len(self.turing_transitions)} transitions // TURING MACHINE"
+            return
+        instructions, labels = self._compile_program(source)
         self.program_instructions = instructions
         self.program_labels = labels
         self.reset_program(announce=False)
         if announce:
-            self.last_event = f"PROGRAM LOAD // {len(instructions)} instructions // LITHO-ISA"
+            self.last_event = f"PROGRAM LOAD // {len(instructions)} instructions // {self.program_architecture}"
 
     def reset_program(self, announce: bool = True) -> None:
         self.program_pc = 0
@@ -910,6 +1125,14 @@ class LabModel:
         self.program_clock = 0
         self.program_bus_value = 0.0
         self.program_input_value = 0.0
+        self.program_memory = list(self.program_memory_image)
+        self.program_flags = {"Z": False, "N": False, "C": False, "V": False}
+        self.program_stack_pointer = 0xFF
+        self.program_ports = {}
+        self.turing_tape = dict(self.turing_tape_image)
+        self.turing_head = int(self.turing_head)
+        self.turing_state = self.turing_start_state
+        self.turing_steps = 0
         self.program_output = []
         self.program_error = ""
         self._reset_program_workers()
@@ -917,7 +1140,7 @@ class LabModel:
             self.last_event = "PROGRAM RESET // all cluster cores cleared" if self.cluster_enabled else "PROGRAM RESET // registers cleared"
 
     def start_program(self, announce: bool = True) -> None:
-        if not self.program_instructions:
+        if not self.program_instructions and not self.is_turing:
             self.program_error = "program has no instructions"
             self.last_event = "PROGRAM ERROR // no instructions"
             return
@@ -934,7 +1157,8 @@ class LabModel:
         self.program_error = ""
         if announce:
             scope = f" // {len(self.program_workers)} shared cores" if self.cluster_enabled else ""
-            self.last_event = f"PROGRAM RUN // {self.program_speed} instructions per frame{scope}"
+            unit = "transitions" if self.is_turing else "instructions"
+            self.last_event = f"PROGRAM RUN // {self.program_speed} {unit} per frame{scope}"
 
     def stop_program(self, announce: bool = True) -> None:
         self._save_active_program_worker()
@@ -958,13 +1182,64 @@ class LabModel:
         for token in args:
             register = token.upper().lstrip("$")
             if register in self.program_registers:
-                values.append(f"{register}={self.program_registers[register]:0.4f}")
+                if self.is_8bit:
+                    value = int(self.program_registers[register]) & 0xFF
+                    values.append(f"{register}=0x{value:02X} ({value})")
+                else:
+                    values.append(f"{register}={self.program_registers[register]:0.4f}")
             else:
                 values.append(token)
         self.program_output.append(" ".join(values)[:160])
         self.program_output = self.program_output[-12:]
 
+    def _step_turing(self) -> bool:
+        if self.program_halted:
+            return False
+        if self.program_wait:
+            self.program_wait -= 1
+            self.program_clock += 1
+            self._save_active_program_worker()
+            return True
+        symbol = self.turing_tape.get(self.turing_head, self.turing_blank)
+        transition = self.turing_transitions.get((self.turing_state, symbol))
+        if transition is None:
+            accepted = self.turing_state in self.turing_accept_states
+            rejected = self.turing_state in self.turing_reject_states
+            result = "ACCEPT" if accepted else "REJECT" if rejected else "HALT"
+            self.program_halted = True
+            self.program_running = False
+            self.last_event = f"TURING {result} // state {self.turing_state} // head {self.turing_head} // steps {self.turing_steps}"
+            self.program_output.append(f"{result} at {self.turing_state} / head {self.turing_head}")
+            self.program_output = self.program_output[-12:]
+            self._save_active_program_worker()
+            return False
+        write_symbol = transition.get("write", symbol)[:1] or self.turing_blank
+        move = transition.get("move", "N").upper()
+        next_state = transition.get("next", self.turing_state)
+        self.turing_tape[self.turing_head] = write_symbol
+        if move in {"L", "LEFT", "<"}:
+            self.turing_head -= 1
+        elif move in {"R", "RIGHT", ">"}:
+            self.turing_head += 1
+        self.turing_state = next_state
+        self.turing_steps += 1
+        self.program_bus_value = 1.0 if write_symbol == "1" else 0.0
+        self.program_output.append(f"{self.turing_state} READ {symbol} WRITE {write_symbol} MOVE {move} HEAD {self.turing_head}")
+        self.program_output = self.program_output[-12:]
+        self.program_clock += 1
+        if self.turing_state in self.turing_accept_states or self.turing_state in self.turing_reject_states:
+            result = "ACCEPT" if self.turing_state in self.turing_accept_states else "REJECT"
+            self.program_halted = True
+            self.program_running = False
+            self.last_event = f"TURING {result} // state {self.turing_state} // steps {self.turing_steps}"
+        else:
+            self.last_event = f"TURING STEP // {self.turing_state} // head {self.turing_head} // tape {write_symbol}"
+        self._save_active_program_worker()
+        return True
+
     def step_program(self) -> bool:
+        if self.is_turing:
+            return self._step_turing()
         if self.program_halted or not self.program_instructions:
             return False
         if self.program_wait:
@@ -986,15 +1261,150 @@ class LabModel:
             elif opcode in {"CONST", "SET"}:
                 if len(args) != 2:
                     raise ValueError(f"{opcode} needs DEST VALUE")
-                self.program_registers[self._program_register(args[0])] = self._program_value(args[1])
+                self._program_set_register(self._program_register(args[0]), self._program_value(args[1]))
             elif opcode == "MOV":
                 if len(args) != 2:
                     raise ValueError("MOV needs DEST SOURCE")
-                self.program_registers[self._program_register(args[0])] = self._program_value(args[1])
+                self._program_set_register(self._program_register(args[0]), self._program_value(args[1]))
             elif opcode in {"LANE", "CORE"}:
                 if len(args) != 1:
                     raise ValueError(f"{opcode} needs DEST")
                 self.program_registers[self._program_register(args[0])] = float(self.program_active_worker)
+            elif opcode == "IMM8":
+                if len(args) != 2:
+                    raise ValueError("IMM8 needs DEST VALUE")
+                self._program_set_register(self._program_register(args[0]), self._program_value(args[1]))
+            elif opcode == "MOV8":
+                if len(args) != 2:
+                    raise ValueError("MOV8 needs DEST SOURCE")
+                self._program_set_register(self._program_register(args[0]), self._program_value(args[1]))
+            elif opcode == "LOAD8":
+                if len(args) != 2:
+                    raise ValueError("LOAD8 needs DEST ADDRESS")
+                destination = self._program_register(args[0])
+                value = self.program_memory[self._program_address(args[1])]
+                self._program_set_register(destination, value, update_flags=True)
+            elif opcode == "STORE8":
+                if len(args) != 2:
+                    raise ValueError("STORE8 needs ADDRESS SOURCE")
+                self.program_memory[self._program_address(args[0])] = int(round(self._program_value(args[1]))) & 0xFF
+            elif opcode in {"ADD8", "SUB8"}:
+                if len(args) != 3:
+                    raise ValueError(f"{opcode} needs DEST A B")
+                destination = self._program_register(args[0])
+                left = int(round(self._program_value(args[1]))) & 0xFF
+                right = int(round(self._program_value(args[2]))) & 0xFF
+                if opcode == "ADD8":
+                    total = left + right
+                    result = total & 0xFF
+                    self.program_flags["C"] = total > 0xFF
+                    self.program_flags["V"] = bool((~(left ^ right) & (left ^ result) & 0x80) != 0)
+                else:
+                    difference = left - right
+                    result = difference & 0xFF
+                    self.program_flags["C"] = left >= right
+                    self.program_flags["V"] = bool(((left ^ right) & (left ^ result) & 0x80) != 0)
+                self._program_set_register(destination, result, update_flags=True)
+            elif opcode in {"AND8", "OR8", "XOR8"}:
+                if len(args) != 3:
+                    raise ValueError(f"{opcode} needs DEST A B")
+                destination = self._program_register(args[0])
+                left = int(round(self._program_value(args[1]))) & 0xFF
+                right = int(round(self._program_value(args[2]))) & 0xFF
+                if opcode == "AND8":
+                    result = left & right
+                elif opcode == "OR8":
+                    result = left | right
+                else:
+                    result = left ^ right
+                self._program_set_register(destination, result, update_flags=True)
+                self.program_flags["C"] = False
+            elif opcode == "NOT8":
+                if len(args) != 2:
+                    raise ValueError("NOT8 needs DEST SOURCE")
+                result = (~int(round(self._program_value(args[1]))) & 0xFF)
+                self._program_set_register(self._program_register(args[0]), result, update_flags=True)
+            elif opcode in {"INC8", "DEC8"}:
+                if len(args) != 1:
+                    raise ValueError(f"{opcode} needs DEST")
+                register = self._program_register(args[0])
+                current = int(round(self._program_value(register))) & 0xFF
+                result = (current + 1) & 0xFF if opcode == "INC8" else (current - 1) & 0xFF
+                self._program_set_register(register, result, update_flags=True)
+                self.program_flags["C"] = result == 0 if opcode == "INC8" else current != 0
+            elif opcode in {"SHL8", "SHR8"}:
+                if len(args) != 3:
+                    raise ValueError(f"{opcode} needs DEST SOURCE COUNT")
+                destination = self._program_register(args[0])
+                source = int(round(self._program_value(args[1]))) & 0xFF
+                count = max(0, min(8, int(self._program_value(args[2]))))
+                if count == 0:
+                    result = source
+                    self.program_flags["C"] = False
+                elif opcode == "SHL8":
+                    self.program_flags["C"] = bool(source & (1 << (8 - count)))
+                    result = (source << count) & 0xFF
+                else:
+                    self.program_flags["C"] = bool(source & (1 << (count - 1)))
+                    result = source >> count
+                self._program_set_register(destination, result, update_flags=True)
+            elif opcode == "CMP8":
+                if len(args) != 2:
+                    raise ValueError("CMP8 needs A B")
+                left = int(round(self._program_value(args[0]))) & 0xFF
+                right = int(round(self._program_value(args[1]))) & 0xFF
+                result = (left - right) & 0xFF
+                self._program_set_logic_flags(result)
+                self.program_flags["C"] = left >= right
+                self.program_flags["V"] = bool(((left ^ right) & (left ^ result) & 0x80) != 0)
+            elif opcode == "PUSH8":
+                if len(args) != 1:
+                    raise ValueError("PUSH8 needs SOURCE")
+                self._program_push8(int(round(self._program_value(args[0]))) & 0xFF)
+            elif opcode == "POP8":
+                if len(args) != 1:
+                    raise ValueError("POP8 needs DEST")
+                self._program_set_register(self._program_register(args[0]), self._program_pop8(), update_flags=True)
+            elif opcode == "IN8":
+                if len(args) != 2:
+                    raise ValueError("IN8 needs DEST PORT")
+                port = self._program_address(args[1])
+                if port == 0:
+                    value = int(round(min(1.0, max(0.0, self.program_input_value)) * 255.0))
+                else:
+                    value = int(self.program_ports.get(port, 0)) & 0xFF
+                self._program_set_register(self._program_register(args[0]), value, update_flags=True)
+            elif opcode == "OUT8":
+                if len(args) != 2:
+                    raise ValueError("OUT8 needs PORT SOURCE")
+                port = self._program_address(args[0])
+                value = int(round(self._program_value(args[1]))) & 0xFF
+                self.program_ports[port] = value
+                if port == 0:
+                    self.program_bus_value = value / 255.0
+                self.program_output.append(f"PORT {port:02X} <= 0x{value:02X} ({value})")
+                self.program_output = self.program_output[-12:]
+                self.last_event = f"8BIT OUT // port 0x{port:02X} // value 0x{value:02X}"
+            elif opcode in {"JZ8", "JNZ8", "JC8", "JNC8"}:
+                if len(args) != 1:
+                    raise ValueError(f"{opcode} needs LABEL")
+                flag = "Z" if opcode in {"JZ8", "JNZ8"} else "C"
+                condition = self.program_flags[flag]
+                if opcode in {"JNZ8", "JNC8"}:
+                    condition = not condition
+                if condition:
+                    self._program_jump(args[0])
+            elif opcode == "CALL":
+                if len(args) != 1:
+                    raise ValueError("CALL needs LABEL")
+                return_address = self.program_pc
+                self._program_push8(return_address & 0xFF)
+                self._program_push8((return_address >> 8) & 0xFF)
+                self._program_jump(args[0])
+            elif opcode == "RET":
+                high = self._program_pop8()
+                low = self._program_pop8()
+                self.program_pc = ((high << 8) | low) % max(1, len(self.program_instructions))
             elif opcode in {"ADD", "SUB", "MUL", "DIV"}:
                 if len(args) not in {2, 3}:
                     raise ValueError(f"{opcode} needs DEST SOURCE [SOURCE]")
@@ -1009,12 +1419,19 @@ class LabModel:
                     value = left * right
                 else:
                     value = left / right if abs(right) > 1e-12 else 0.0
-                self.program_registers[destination] = value
+                if self.is_8bit:
+                    self._program_set_register(destination, value, update_flags=True)
+                else:
+                    self.program_registers[destination] = value
             elif opcode in {"INC", "DEC"}:
                 if len(args) != 1:
                     raise ValueError(f"{opcode} needs DEST")
                 register = self._program_register(args[0])
-                self.program_registers[register] += 1.0 if opcode == "INC" else -1.0
+                if self.is_8bit:
+                    current = int(round(self.program_registers[register])) & 0xFF
+                    self._program_set_register(register, current + (1 if opcode == "INC" else -1), update_flags=True)
+                else:
+                    self.program_registers[register] += 1.0 if opcode == "INC" else -1.0
             elif opcode == "CLAMP":
                 if len(args) != 3:
                     raise ValueError("CLAMP needs DEST LOW HIGH")
@@ -1114,7 +1531,8 @@ class LabModel:
             elif opcode in {"SEND", "OUTPUT"}:
                 if len(args) != 1:
                     raise ValueError(f"{opcode} needs SOURCE")
-                self.program_bus_value = min(1.0, max(0.0, self._program_value(args[0])))
+                value = self._program_value(args[0])
+                self.program_bus_value = (int(round(value)) & 0xFF) / 255.0 if self.is_8bit else min(1.0, max(0.0, value))
                 self.last_event = f"PROGRAM BUS // value {self.program_bus_value:0.4f} // pc {self.program_pc:03d}"
             elif opcode == "PRINT":
                 self._program_print(args)
@@ -1203,6 +1621,13 @@ class LabModel:
         if self.cluster_enabled:
             lanes = "/".join(f"{worker['bus_value']:0.2f}" for worker in self.program_workers)
             cluster = f"  DUAL-SERVER {running_count}/{len(self.program_workers)}  {self.cluster_link_type.upper()} {self.cluster_latency_ticks}T TX{self.cluster_transfers}  LANES {lanes}"
+        if self.is_turing:
+            tape_window = "".join(self.turing_tape.get(position, self.turing_blank) for position in range(self.turing_head - 8, self.turing_head + 9))
+            return f"{state} TURING STATE={self.turing_state} HEAD={self.turing_head:+04d} STEPS={self.turing_steps:04d} SPEED={self.program_speed:03d}{cluster} TAPE[{tape_window}] OUT {output[:18]}"
+        if self.is_8bit:
+            register_summary = " ".join(f"R{index}={int(self.program_registers[f'R{index}']) & 0xFF:02X}" for index in range(4))
+            flags = "".join(name if self.program_flags.get(name, False) else "-" for name in ("Z", "N", "C", "V"))
+            return f"{state} LITHO-8 PC {self.program_pc:03d}/{len(self.program_instructions):03d}  SPEED {self.program_speed:03d}  {register_summary} FLAGS={flags} SP={self.program_stack_pointer:02X}{cluster}  OUT {output[:20]}"
         return f"{state} PC {self.program_pc:03d}/{len(self.program_instructions):03d}  SPEED {self.program_speed:03d}{cluster}  OUT {output[:20]}"
 
     def valid_cell(self, cell: GridCell) -> bool:
@@ -1228,7 +1653,7 @@ class LabModel:
         if preset is None:
             return False
         target_layer = max(1, int(layer))
-        direction = direction if direction in DIRECTIONS else "east"
+        direction = normalize_direction(direction)
         targets = [(origin[0] + dx, origin[1] + dy, target_layer, material) for dx, dy, material in preset.blocks]
         if any(material not in MATERIALS and material not in GATE_TYPES for _, _, _, material in targets):
             self.last_event = f"PRESET INVALID // {preset.label} contains an unknown tile"
@@ -1256,7 +1681,7 @@ class LabModel:
         if top is None:
             top = -1
         target_layer = top + 1 if layer is None else max(1, int(layer))
-        direction = direction if direction in DIRECTIONS else "east"
+        direction = normalize_direction(direction)
         if (cell[0], cell[1], target_layer) in self.voxels:
             self.last_event = f"LAYER OCCUPIED // remove [{cell[0]:02d},{cell[1]:02d}] on L{target_layer}"
             return False
@@ -1289,7 +1714,7 @@ class LabModel:
         self.last_event = f"ETCH // removed {MATERIALS.get(material, Material('', material, '', '', '', '', '', '')).label} at [{cell[0]:02d},{cell[1]:02d}] L{target_layer}"
         return True
 
-    def logic_place(self, chip_code: str, cell: GridCell, gate: str) -> bool:
+    def logic_place(self, chip_code: str, cell: GridCell, gate: str, direction: str = "east") -> bool:
         logic = self.chip_logic.get(chip_code)
         if logic is None or gate not in GATE_TYPES or not (0 <= cell[0] < 9 and 0 <= cell[1] < 6):
             return False
@@ -1300,6 +1725,7 @@ class LabModel:
             self.last_event = f"GATE STOCK EMPTY // {GATE_TYPES[gate].label}"
             return False
         logic.gates[cell] = gate
+        logic.gate_directions[cell] = normalize_direction(direction)
         if not self.infinite_supply:
             self.gate_inventory[gate] -= 1
         self.operations += 1
@@ -1311,6 +1737,7 @@ class LabModel:
         if logic is None or cell not in logic.gates:
             return False
         gate = logic.gates.pop(cell)
+        logic.gate_directions.pop(cell, None)
         if not self.infinite_supply:
             self.gate_inventory[gate] += 1
         self.operations += 1
@@ -1338,7 +1765,9 @@ class LabModel:
         logic = self.chip_logic[chip.code]
         for index in range(chip.gate_target):
             gate = GATE_ORDER[index % len(GATE_ORDER)]
-            logic.gates[(index % 9, 2 + ((index // 9) % 4))] = gate
+            cell = (index % 9, 2 + ((index // 9) % 4))
+            logic.gates[cell] = gate
+            logic.gate_directions[cell] = "east"
         for face in logic.ports:
             logic.ports[face] = [True] * len(logic.ports[face])
 
@@ -1349,12 +1778,23 @@ class LabModel:
         if isinstance(raw_voxels, list):
             restored: Dict[Voxel, str] = {}
             for item in raw_voxels:
-                if isinstance(item, list) and len(item) >= 4 and (str(item[3]) in MATERIALS or str(item[3]) in GATE_TYPES):
+                if isinstance(item, dict):
+                    material = str(item.get("material", ""))
+                    if material not in MATERIALS and material not in GATE_TYPES:
+                        continue
+                    x, y, z = int(item.get("x", 0)), int(item.get("y", 0)), max(0, int(item.get("z", 0)))
+                    rotation = item.get("direction", item.get("rotation", "east"))
+                elif isinstance(item, list) and len(item) >= 4:
+                    material = str(item[3])
+                    if material not in MATERIALS and material not in GATE_TYPES:
+                        continue
                     x, y, z = int(item[0]), int(item[1]), max(0, int(item[2]))
-                    voxel = (x, y, z)
-                    restored[voxel] = str(item[3])
-                    if len(item) >= 5 and str(item[4]) in DIRECTIONS + ["up"]:
-                        self.voxel_directions[voxel] = str(item[4])
+                    rotation = item[4] if len(item) >= 5 else "east"
+                else:
+                    continue
+                voxel = (x, y, z)
+                restored[voxel] = material
+                self.voxel_directions[voxel] = "up" if material == "via" and str(rotation).lower() == "up" else normalize_direction(rotation, allow_up=(material == "via"))
             if restored:
                 self.voxels = restored
                 self._top_cache.clear()
@@ -1370,12 +1810,15 @@ class LabModel:
                 if logic is None or not isinstance(raw_chip_logic, dict):
                     continue
                 logic.gates.clear()
+                logic.gate_directions.clear()
                 logic.ports = {face: [False] * len(values) for face, values in logic.ports.items()}
                 for raw_gate in raw_chip_logic.get("gates", []):
                     if isinstance(raw_gate, dict) and isinstance(raw_gate.get("slot"), list) and len(raw_gate["slot"]) == 2:
                         gate = str(raw_gate.get("gate", ""))
                         if gate in GATE_TYPES:
-                            logic.gates[(int(raw_gate["slot"][0]), int(raw_gate["slot"][1]))] = gate
+                            cell = (int(raw_gate["slot"][0]), int(raw_gate["slot"][1]))
+                            logic.gates[cell] = gate
+                            logic.gate_directions[cell] = normalize_direction(raw_gate.get("direction", raw_gate.get("rotation", "east")))
                 for raw_port in raw_chip_logic.get("ports", []):
                     if isinstance(raw_port, list) and len(raw_port) == 2:
                         face, index = str(raw_port[0]), int(raw_port[1])
@@ -1411,7 +1854,12 @@ class LabModel:
                 "tint": chip.tint,
                 "output": chip.output,
                 "initial_gates": [
-                    {"slot": list(slot), "gate": gate}
+                    {
+                        "slot": list(slot),
+                        "gate": gate,
+                        "direction": logic.gate_directions.get(slot, "east"),
+                        "rotation": direction_rotation(logic.gate_directions.get(slot, "east")),
+                    }
                     for slot, gate in logic.gates.items()
                 ],
                 "connected_ports": [
@@ -1424,22 +1872,62 @@ class LabModel:
         return saved_chips
 
     def save_json(self, filename: str, ui_state: Optional[Dict[str, Any]] = None) -> Path:
+        self._save_active_program_worker()
         output_path = Path(filename).expanduser()
         data = json.loads(json.dumps(self.config))
         data["infinite_supply"] = self.infinite_supply
         data["chips"] = self._chip_json()
         data["inventory"] = dict(self.inventory)
+        data["equations"] = list(self.equations)
+        data["equation_proposals"] = list(self.equation_proposals)
         data["program"] = {
-            "language": "LITHO-ISA",
+            "language": "TURING-MACHINE" if self.is_turing else "LITHO-8" if self.is_8bit else "LITHO-ISA",
+            "architecture": self.program_architecture,
             "auto_start": bool(self.program_running),
             "speed": self.program_speed,
             "source": self.program_source,
         }
+        if self.is_8bit:
+            data["program"]["memory_size"] = self.program_memory_size
+            data["program"]["memory"] = list(self.program_memory)
+            data["program"]["ports"] = {str(address): value for address, value in self.program_ports.items()}
+        elif self.is_turing:
+            data["program"]["turing"] = {
+                "blank": self.turing_blank,
+                "tape": {str(position): symbol for position, symbol in self.turing_tape.items()},
+                "head": self.turing_head,
+                "start_state": self.turing_start_state,
+                "state": self.turing_state,
+                "accept_states": sorted(self.turing_accept_states),
+                "reject_states": sorted(self.turing_reject_states),
+                "transitions": [
+                    {"state": state, "read": read, **transition}
+                    for (state, read), transition in self.turing_transitions.items()
+                ],
+            }
         data["state"] = {
-            "voxels": [[x, y, z, material, self.voxel_directions.get((x, y, z), "east")] for (x, y, z), material in sorted(self.voxels.items())],
+            "voxels": [
+                {
+                    "x": x,
+                    "y": y,
+                    "z": z,
+                    "material": material,
+                    "direction": self.voxel_directions.get((x, y, z), "east"),
+                    "rotation": direction_rotation(self.voxel_directions.get((x, y, z), "east")),
+                }
+                for (x, y, z), material in sorted(self.voxels.items())
+            ],
             "chip_logic": {
                 code: {
-                    "gates": [{"slot": list(slot), "gate": gate} for slot, gate in logic.gates.items()],
+                    "gates": [
+                        {
+                            "slot": list(slot),
+                            "gate": gate,
+                            "direction": logic.gate_directions.get(slot, "east"),
+                            "rotation": direction_rotation(logic.gate_directions.get(slot, "east")),
+                        }
+                        for slot, gate in logic.gates.items()
+                    ],
                     "ports": [[face, index] for face, values in logic.ports.items() for index, connected in enumerate(values) if connected],
                 }
                 for code, logic in self.chip_logic.items()
@@ -1501,6 +1989,150 @@ class LabModel:
             return f"{idle} // ALL CHIP PATHS NOMINAL // {supply}"
         return f"{idle} // {passed:02d}/{len(CHIPS):02d} CHIP PATHS / {connected:02d}/{ports:02d} PORTS // {supply}"
 
+    def evaluate_equation(self, expression: str) -> Tuple[str, float]:
+        """Evaluate a proposal with safe sample variables and simple statements.
+
+        A proposal may be one expression or a small sequence such as
+        ``m = 2; x = 0.75; y = m * x``. Unknown variables are still rejected,
+        but common engineering symbols have deterministic sample values so a
+        bare ``m`` does not make an otherwise valid proposal fail.
+        """
+        started = time.perf_counter()
+        raw = str(expression).strip()
+        samples = {
+            "x": 0.75, "y": 0.50, "w": 0.40, "b": 0.10,
+            "a": 0.60, "p": 0.25, "n": 4.0, "m": 1.0,
+            "t": 1.0, "q": 0.50, "r": 0.25,
+            "c": 0.25, "k": 0.80, "d": 0.10,
+        }
+        functions = {
+            "abs": abs, "cos": math.cos, "exp": math.exp,
+            "log": math.log, "max": max, "min": min,
+            "sin": math.sin, "sqrt": math.sqrt, "tan": math.tan,
+        }
+        allowed_nodes = (
+            ast.Expression, ast.BinOp, ast.UnaryOp, ast.Add, ast.Sub,
+            ast.Mult, ast.Div, ast.Pow, ast.Mod, ast.USub, ast.UAdd,
+            ast.Constant, ast.Name, ast.Call, ast.Load,
+        )
+
+        def scalar_value(source: str, variables: Dict[str, float]) -> float:
+            normalized = source.replace("^", "**").replace("·", "*")
+            normalized = normalized.replace("xᵢ", "x").replace("wᵢ", "w")
+            tree = ast.parse(normalized.strip(), mode="eval")
+            for node in ast.walk(tree):
+                if not isinstance(node, allowed_nodes):
+                    raise ValueError("unsupported operator or syntax")
+                if isinstance(node, ast.Constant) and not isinstance(node.value, (int, float)):
+                    raise ValueError("only numeric constants are supported")
+                if isinstance(node, ast.Name) and node.id not in variables and node.id not in functions:
+                    raise ValueError(f"unknown symbol {node.id}")
+                if isinstance(node, ast.Call) and (not isinstance(node.func, ast.Name) or node.func.id not in functions):
+                    raise ValueError("function is not in the safe math set")
+            result = eval(compile(tree, "<equation>", "eval"), {"__builtins__": {}}, {**variables, **functions})
+            if not isinstance(result, (int, float)) or not math.isfinite(float(result)):
+                raise ValueError("result is not a finite number")
+            return float(result)
+
+        declared_variables = set()
+
+        def sampled_sum(source: str, variables: Dict[str, float]) -> str:
+            lane_source = variables.get("m") if "m" in declared_variables else variables.get("n", 4.0)
+            lane_count = max(1, min(32, int(lane_source)))
+            if lane_count == 1:
+                lane_x = (0.75,)
+                lane_w = (0.40,)
+            else:
+                lane_x = tuple(0.25 + 0.75 * index / (lane_count - 1) for index in range(lane_count))
+                lane_w = tuple(0.10 + 0.30 * index / (lane_count - 1) for index in range(lane_count))
+            result = sum(weight * value for weight, value in zip(lane_w, lane_x)) + variables.get("b", 0.10)
+            return f"{result:.8g}  (sampled Σ over {lane_count} lanes)"
+
+        answer = ""
+        try:
+            # Newlines and semicolons separate state statements. `let`, `var`,
+            # and `const` are accepted as readable aliases for assignment.
+            statements = []
+            for line in raw.splitlines():
+                statements.extend(part.strip() for part in line.split(";") if part.strip())
+            if not statements:
+                raise ValueError("equation expression cannot be empty")
+
+            variables: Dict[str, float] = dict(samples)
+            last_value: Optional[float] = None
+            last_answer: Optional[str] = None
+            last_name = ""
+            expression_statements = []
+            for statement in statements:
+                left, separator, right = statement.partition("=")
+                declaration = left.strip()
+                for prefix in ("let ", "var ", "const "):
+                    if declaration.lower().startswith(prefix):
+                        declaration = declaration[len(prefix):].strip()
+                        break
+                if ":" in declaration:
+                    declaration = declaration.split(":", 1)[0].strip()
+                if separator and declaration.isidentifier():
+                    assignment_rhs = right.strip()
+                    normalized_rhs = assignment_rhs.replace("xᵢ", "x").replace("wᵢ", "w")
+                    if "Σ" in normalized_rhs or "∑" in normalized_rhs:
+                        sampled_answer = sampled_sum(normalized_rhs, variables)
+                        last_value = float(sampled_answer.split()[0])
+                        last_answer = sampled_answer
+                    elif any(marker in normalized_rhs for marker in ("⟨", "⟩", "|", "→", "√")):
+                        raise ValueError("symbolic quantum/state notation cannot be assigned a scalar value")
+                    else:
+                        last_value = scalar_value(assignment_rhs, variables)
+                        last_answer = None
+                    variables[declaration] = last_value
+                    declared_variables.add(declaration)
+                    last_name = declaration
+                else:
+                    expression_statements.append(statement)
+
+            if expression_statements:
+                final_expression = " ".join(expression_statements)
+                normalized = final_expression.replace("xᵢ", "x").replace("wᵢ", "w")
+                if "Σ" in normalized or "∑" in normalized:
+                    answer = sampled_sum(normalized, variables)
+                elif any(marker in normalized for marker in ("⟨", "⟩", "|", "→", "√")):
+                    answer = "SYMBOLIC  // quantum/state notation"
+                else:
+                    answer = f"{scalar_value(final_expression, variables):.8g}"
+            elif last_value is not None:
+                answer = last_answer or f"{last_value:.8g}  ({last_name})"
+            else:
+                raise ValueError("no evaluable expression found")
+        except (SyntaxError, TypeError, ValueError, ZeroDivisionError, OverflowError) as exc:
+            answer = f"SYMBOLIC  // {exc}"
+        elapsed_ms = (time.perf_counter() - started) * 1000.0
+        return answer, elapsed_ms
+
+    def propose_equation(self, chip_code: str, name: str, expression: str) -> Dict[str, str]:
+        chip_code = str(chip_code).strip()
+        name = str(name).strip() or "EQUATION PROPOSAL"
+        expression = str(expression).strip()
+        valid_codes = {chip.code for chip in CHIPS}
+        if chip_code not in valid_codes:
+            raise ValueError(f"unknown chip {chip_code}")
+        if not expression:
+            raise ValueError("equation expression cannot be empty")
+        if len(name) > 48 or len(expression) > 220:
+            raise ValueError("equation name or expression is too long")
+        answer, elapsed_ms = self.evaluate_equation(expression)
+        proposal = {
+            "name": name,
+            "expression": expression,
+            "chip": chip_code,
+            "status": "PROPOSED",
+            "answer": answer,
+            "elapsed_ms": f"{elapsed_ms:.3f}",
+        }
+        self.equation_proposals.append(proposal)
+        self.equations.append(proposal)
+        self.last_event = f"EQUATION PROPOSED // {chip_code} // {answer[:42]}"
+        return proposal
+
     def equation_text(self, index: int = 0) -> str:
         if not self.equations:
             return ""
@@ -1508,7 +2140,9 @@ class LabModel:
         if isinstance(item, dict):
             name = str(item.get("name", "EQUATION"))
             expression = str(item.get("expression", item.get("equation", "")))
-            return f"{name}: {expression}" if expression else name
+            chip = str(item.get("chip", ""))
+            prefix = f"{chip} // " if chip else ""
+            return f"{prefix}{name}: {expression}" if expression else f"{prefix}{name}"
         return str(item)
 
     def bus_health(self) -> float:
@@ -1568,7 +2202,17 @@ class LithoLab:
         self.file_menu.add_command(label="Load Neural Example", command=lambda: self.load_system_path(Path(__file__).with_name("example_system.json")))
         self.file_menu.add_command(label="Load Quantum Example", command=lambda: self.load_system_path(Path(__file__).with_name("quantum_system.json")))
         self.file_menu.add_command(label="Load Parallel Example", command=lambda: self.load_system_path(Path(__file__).with_name("parallel_system.json")))
+        self.file_menu.add_command(label="Load 8-bit Computer", command=lambda: self.load_system_path(Path(__file__).with_name("8bit_computer.json")))
+        self.file_menu.add_command(label="Load Turing Machine", command=lambda: self.load_system_path(Path(__file__).with_name("turing_machine.json")))
+        self.experimental_menu = tk.Menu(self.file_menu, tearoff=False, bg="#0d1c26", fg=self.TEXT, activebackground="#2d5c68", activeforeground="#ffffff")
+        self.experimental_menu.add_command(label="Topological Braid Computer", command=lambda: self.load_system_path(Path(__file__).with_name("experimental_topological.json")))
+        self.experimental_menu.add_command(label="Photonic Wavefront Computer", command=lambda: self.load_system_path(Path(__file__).with_name("experimental_photonic.json")))
+        self.experimental_menu.add_command(label="Hybrid Quantum Computer", command=lambda: self.load_system_path(Path(__file__).with_name("experimental_hybrid.json")))
+        self.file_menu.add_cascade(label="Experimental Computers", menu=self.experimental_menu)
         self.file_menu.add_command(label="Edit / Run LITHO-ISA Program…", command=self.open_program_editor)
+        self.file_menu.add_command(label="Propose Equation to Chip…", command=self.open_equation_console)
+        self.file_menu.add_command(label="Guided Top-Down Chip Walkthrough…", command=self.open_walkthrough)
+        self.file_menu.add_command(label="Open 512×512 Screen Output…", command=self.open_screen_output)
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Save System", command=self.save_game)
         self.file_menu.add_command(label="Save System As…", command=lambda: self.save_game(save_as=True))
@@ -1578,6 +2222,19 @@ class LithoLab:
         self.program_editor_window: Optional[tk.Toplevel] = None
         self.program_text_widget: Optional[tk.Text] = None
         self.program_editor_status: Optional[tk.Label] = None
+        self.equation_window: Optional[tk.Toplevel] = None
+        self.equation_chip_var: Optional[tk.StringVar] = None
+        self.equation_name_entry: Optional[tk.Entry] = None
+        self.equation_expression_widget: Optional[tk.Text] = None
+        self.equation_proposal_list: Optional[tk.Listbox] = None
+        self.equation_status: Optional[tk.Label] = None
+        self.walkthrough_window: Optional[tk.Toplevel] = None
+        self.walkthrough_body: Optional[tk.Text] = None
+        self.walkthrough_list: Optional[tk.Listbox] = None
+        self.walkthrough_steps: List[Tuple[str, str]] = []
+        self.walkthrough_step = 0
+        self.screen_output_window: Optional[tk.Toplevel] = None
+        self.screen_output_canvas: Optional[tk.Canvas] = None
         self.program_speed_var = tk.IntVar(self.root, value=self.model.program_speed)
         self.compute_speed_frame = tk.Frame(self.root, bg="#0b1922", highlightbackground="#244653", highlightthickness=1)
         self.compute_speed_title = tk.Label(self.compute_speed_frame, text="COMPUTE SPEED", bg="#0b1922", fg=self.CYAN, font=("TkFixedFont", 7, "bold"))
@@ -2287,8 +2944,13 @@ class LithoLab:
                 c.create_rectangle(x1 + 2, y1 + 2, x2 - 2, y2 - 2, fill=fill if gate_key else "#0f202a", outline=outline, width=2 if gate_key else 1)
                 if gate_key:
                     gate = GATE_TYPES[gate_key]
-                    c.create_text((x1 + x2) / 2, (y1 + y2) / 2 - 7, text=gate.symbol, fill="#071118", font=("TkFixedFont", 18, "bold"))
-                    c.create_text((x1 + x2) / 2, (y1 + y2) / 2 + 15, text=gate.label, fill="#071118", font=("TkFixedFont", 7, "bold"))
+                    center_x, center_y = (x1 + x2) / 2, (y1 + y2) / 2
+                    c.create_text(center_x, center_y - 7, text=gate.symbol, fill="#071118", font=("TkFixedFont", 18, "bold"))
+                    c.create_text(center_x, center_y + 15, text=gate.label, fill="#071118", font=("TkFixedFont", 7, "bold"))
+                    gate_direction = normalize_direction(logic.gate_directions.get((x, y), "east"))
+                    vx, vy = self.direction_vector(gate_direction)
+                    c.create_line(center_x, center_y, center_x + vx * 23, center_y + vy * 23, fill="#ffffff", width=2, arrow=tk.LAST)
+                    c.create_text(center_x + vx * 26, center_y + vy * 26, text=gate_direction[0].upper(), fill="#ffffff", font=("TkFixedFont", 7, "bold"))
                 else:
                     c.create_text((x1 + x2) / 2, (y1 + y2) / 2, text="+", fill="#315362", font=("TkFixedFont", 15))
         for face, count in chip.face_slots.items():
@@ -2346,6 +3008,96 @@ class LithoLab:
                 if (sx - px) ** 2 + (sy - py) ** 2 <= 18 ** 2:
                     return face, index
         return None
+
+    def draw_screen_output(self) -> None:
+        """Render the fixed 512×512 computer display surface."""
+        c = self.screen_output_canvas
+        if c is None or not c.winfo_exists():
+            return
+        width, height = 512, 512
+        c.delete("all")
+        c.create_rectangle(0, 0, width, height, fill="#020a10", outline="")
+        c.create_rectangle(8, 8, width - 8, height - 8, fill="#06131b", outline="#42d6d1", width=2)
+
+        def text(x: float, y: float, value: str, fill: str = self.TEXT, size: int = 9, bold: bool = False, anchor: str = "nw") -> None:
+            c.create_text(x, y, text=str(value), fill=fill, anchor=anchor, font=("TkFixedFont", size, "bold" if bold else "normal"))
+
+        def line(xa: float, ya: float, xb: float, yb: float, **kwargs: Any) -> None:
+            c.create_line(xa, ya, xb, yb, **kwargs)
+
+        health = self.model.bus_health()
+        passed = sum(result.passed for result in self.model.results.values())
+        status = "NOMINAL" if health > 0.82 else ("DEGRADED" if health > 0.46 else "FAULT")
+        status_color = self.GREEN if status == "NOMINAL" else (self.AMBER if status == "DEGRADED" else self.RED)
+        text(22, 19, str(self.model.output_config.get("screen_name", "SCREEN OUTPUT"))[:42], fill=self.CYAN, size=13, bold=True)
+        text(490, 20, "512×512", fill=self.GREEN, size=8, bold=True, anchor="ne")
+        line(20, 43, 492, 43, fill="#285762")
+        text(22, 54, self.model.system_name[:57], fill=self.TEXT, size=8, bold=True)
+        text(490, 54, status, fill=status_color, size=8, bold=True, anchor="ne")
+        text(22, 71, self.model.system_output()[:72], fill=self.GREEN if passed else self.CYAN, size=7)
+        text(22, 87, ("> " + self.model.last_event)[:72], fill=self.AMBER if "FAIL" in self.model.last_event else "#83cfd3", size=7)
+
+        if self.model.is_8bit:
+            flags = "".join(name if self.model.program_flags.get(name, False) else "-" for name in ("Z", "N", "C", "V"))
+            registers = " ".join(f"R{index}:{int(self.model.program_registers[f'R{index}']) & 0xFF:02X}" for index in range(4))
+            text(22, 130, f"LITHO-8 // {registers} // FLAGS {flags} // SP {self.model.program_stack_pointer:02X}"[:72], fill="#ffe76b", size=7, bold=True)
+        elif self.model.is_turing:
+            tape_window = "".join(self.model.turing_tape.get(position, self.model.turing_blank) for position in range(self.model.turing_head - 8, self.model.turing_head + 9))
+            text(22, 130, f"TURING // STATE {self.model.turing_state} // HEAD {self.model.turing_head:+04d} // STEPS {self.model.turing_steps:04d} // [{tape_window}]"[:72], fill="#ffe76b", size=7, bold=True)
+        report = self.model.equation_proposals[-1] if self.model.equation_proposals else None
+        if report is not None:
+            text(22, 105, f"EQ // {report.get('chip', '')} // {report.get('name', '')}"[:72], fill="#d6a7ff", size=7, bold=True)
+            text(22, 120, f"ANSWER // {report.get('answer', 'SYMBOLIC')}"[:72], fill="#f0c8ff", size=7)
+            text(490, 120, f"{report.get('elapsed_ms', '—')} ms", fill="#f0c8ff", size=7, anchor="ne")
+        else:
+            text(22, 105, "EQ // no proposal submitted", fill="#806d8f", size=7)
+
+        graph_left, graph_top, graph_right, graph_bottom = 22, 139, 490, 314
+        c.create_rectangle(graph_left, graph_top, graph_right, graph_bottom, fill="#031018", outline="#1c5962")
+        text(graph_left + 10, graph_top + 9, "BUS CARRIER // LIVE GRAPHICAL OUTPUT", fill="#83cfd3", size=8, bold=True)
+        for grid in range(1, 5):
+            gy = graph_top + 34 + grid * (graph_bottom - graph_top - 54) / 5
+            line(graph_left + 8, gy, graph_right - 8, gy, fill="#12313b", dash=(2, 4))
+        for grid in range(1, 9):
+            gx = graph_left + grid * (graph_right - graph_left) / 9
+            line(gx, graph_top + 28, gx, graph_bottom - 12, fill="#0d2730", dash=(2, 4))
+        plot_left, plot_right = graph_left + 10, graph_right - 10
+        plot_top, plot_bottom = graph_top + 32, graph_bottom - 15
+        points: List[float] = []
+        for index in range(120):
+            px = plot_left + index * (plot_right - plot_left) / 119
+            signal = math.sin(self.frame / 6.0 + index * 0.30) * (0.20 + health * 0.22)
+            signal += math.sin(self.frame / 17.0 + index * 0.09) * 0.10
+            py = (plot_top + plot_bottom) / 2 - signal * (plot_bottom - plot_top)
+            points.extend((px, py))
+        c.create_line(*points, fill=self.GREEN if health > 0.46 else self.RED, width=2, smooth=True)
+        line(plot_left, (plot_top + plot_bottom) / 2, plot_right, (plot_top + plot_bottom) / 2, fill="#1e4b53")
+        for lane, layer in enumerate(sorted(self.model.layer_bus_cells)[:4]):
+            lane_y = graph_bottom - 24 - lane * 18
+            line(plot_left, lane_y, plot_right, lane_y, fill="#16424b")
+            text(plot_left + 3, lane_y - 7, f"L{layer}", fill="#5e9da4", size=6, bold=True)
+            packet = self.bus_packet_state(self.model.layer_bus_cells.get(layer, []))
+            if packet is not None:
+                _, _, fraction, direction, hop, hops = packet
+                particle_x = plot_left + ((hop + fraction) / max(1, hops)) * (plot_right - plot_left)
+                arrow = {"east": ">", "west": "<", "north": "^", "south": "v", "northeast": "^>", "northwest": "^<", "southeast": "v>", "southwest": "v<"}.get(direction, "·")
+                c.create_oval(particle_x - 5, lane_y - 5, particle_x + 5, lane_y + 5, fill="#ffe76b", outline="#ffffff")
+                text(particle_x, lane_y, arrow, fill="#071118", size=7, bold=True, anchor="center")
+
+        text(22, 333, "CHIP OUTPUT CHANNELS", fill="#83cfd3", size=8, bold=True)
+        channel_left, channel_top = 22, 352
+        channel_w = 468 / max(1, len(CHIPS))
+        for index, chip in enumerate(CHIPS):
+            result = self.model.results[chip.code]
+            left = channel_left + index * channel_w + 4
+            right = channel_left + (index + 1) * channel_w - 4
+            text((left + right) / 2, channel_top, chip.code, fill=chip.tint, size=7, bold=True, anchor="n")
+            bar_top, bar_bottom = channel_top + 23, channel_top + 108
+            c.create_rectangle(left, bar_top, right, bar_bottom, fill="#0d232d", outline="#1a4650")
+            fill_height = (bar_bottom - bar_top) * result.ratio
+            c.create_rectangle(left + 4, bar_bottom - fill_height, right - 4, bar_bottom - 4, fill=self.GREEN if result.passed else chip.tint, outline="")
+            text((left + right) / 2, bar_bottom + 8, "PASS" if result.passed else "WAIT", fill=self.GREEN if result.passed else self.AMBER, size=6, bold=True, anchor="n")
+        text(22, 481, f"BUS {self.model.bus_name}  //  LAYERS {len(self.model.layer_bus_cells)}  //  FRAME {self.frame % 65536:04X}", fill="#60989e", size=7)
 
     def draw_monitor(self) -> None:
         """Render the independently scrollable monitor and graphical output."""
@@ -2544,6 +3296,7 @@ class LithoLab:
         text(x0 + 14, controls_y + 18, "CTRL+S save   CTRL+P program editor   SCREEN OUTPUT = live computer display", fill=self.MUTED, size=7)
         text(x0 + 14, controls_y + 36, "PACKET ARROW = current hop direction", fill="#8faeb3", size=7)
         text(x0 + 14, controls_y + 54, "BOARD WHEEL zoom   CTRL+WHEEL/Q-E blocks   +/- zoom", fill=self.MUTED, size=7)
+        self.draw_screen_output()
 
     def draw(self, include_monitor: bool = True) -> None:
         self.canvas.delete("all")
@@ -2742,7 +3495,7 @@ class LithoLab:
                 return
             cell = self.editor_cell_at(event.x, event.y)
             if cell is not None:
-                self.model.logic_place(chip.code, cell, self.selected_gate)
+                self.model.logic_place(chip.code, cell, self.selected_gate, self.build_direction)
             return
         if event.x >= self.WORLD_W:
             return
@@ -2776,6 +3529,281 @@ class LithoLab:
             chip = self.chip_at_cell(self.screen_to_grid(event.x, event.y))
             if chip is not None:
                 self.enter_chip_mode(chip)
+
+    def _walkthrough_content(self) -> List[Tuple[str, str]]:
+        gate_lines = [
+            f"{index + 1:02d}. {gate.label} [{gate.key}]\n"
+            f"    OPERATION: {gate.help_text}.\n"
+            f"    PARTICLES: {gate.particle}.\n"
+            f"    LITHOGRAPHY: {gate.fabrication}.\n"
+            f"    EQUATION: {gate.equation or 'defined by the gate operation above'}.\n"
+            for index, gate in enumerate(GATE_TYPES.values())
+        ]
+        return [
+            ("01  TOP-DOWN WORKBENCH", """Goal: fabricate a complete chip from the large PCB/lithography view.\n\nPress T to switch between isometric and top-down construction. The top-down view is the recommended view for this walkthrough because every cell is a direct square placement target. The board is logically infinite. PageUp/PageDown changes the active fabrication layer; the layer indicator and vertical connection labels show where vias cross the stack.\n\nApply this step to switch the viewport to TOP-DOWN L1."""),
+            ("02  SELECT A CHIP", """Choose a chip pattern from the board. Double-click a chip pattern, Shift-click it, press Z for the nearest chip, or use [ and ] to cycle the active chip. The chip pattern cells are the mask specification: every required cell must eventually contain the requested material.\n\nThe chip is a multi-slot device. Its north/east/south/west face slots are the physical bus connections that must be linked later."""),
+            ("03  BUILD THE SUBSTRATE", """At the macro/top-down scale:\n\n1. Use the lower BUILD BLOCKS palette or Q/E to choose PCB, silicon, dielectric, resist, mask, copper, gold, dopants, or particle materials.\n2. Left-click an empty square to deposit a block.\n3. Right-click to etch/remove the upper block.\n4. Press R to rotate the direction of a directional block.\n\nFor a fabrication sequence, start with PCB/silicon, add dielectric and resist, expose with mask, etch, then add copper/gold contacts and active particle channels."""),
+            ("04  ROUTE THE LAYERS", """Lay copper/signal paths from each chip toward the bus. Use via blocks at layer transitions. The bright dashed vertical lines and L1/L2/L3 labels identify connections through the stack.\n\nUse PageUp/PageDown to inspect each layer, and the mouse wheel or +/- to zoom. The live packet arrow shows the current hop direction on the bus. Presets from MATERIAL GATE PRESET can stamp complete particle/lithography assemblies."""),
+            ("05  ENTER CHIP SCALE", """Apply this step to open the nearest chip’s gate editor. In chip scale, the 9×6 grid is the internal particle gate array. The chip’s external face connectors are drawn around the grid.\n\nClick a gate in the PARTICLE GATES palette, or scroll over it to change pages. Left-click a grid slot to place the selected gate; right-click removes it. Q/E also cycles gate choices."""),
+            ("06  FABRICATE THE GATES", """A gate is not just a symbol: it is a recipe of particle materials and lithographic layers. Use the Q-FAB line below the gate palette to see the selected gate’s carriers, process idea, and equation.\n\nThe MATERIAL GATE PRESET dropdown at the macro scale stamps the matching physical assembly. Clear its footprint first, choose a direction with R, then click the board to place it."""),
+            ("07  COMPLETE BUS PORTS", """Click each face connector around the chip to link it to the bus. Linked ports glow green; unlinked slots are amber. The chip status line reports GATES and BUS PORTS progress.\n\nA chip is ready only when its material mask matches, its gate target is reached, and every required face slot is connected."""),
+            ("08  EXPOSE AND VERIFY", """Press L in chip scale to expose the active chip. The fabrication engine checks the mask and internal gate/port logic. A passing chip appears in the queue as PASS and contributes to bus health.\n\nThe right sidebar is the input/output monitor. Scroll it to see the screen, carrier graph, layer packets, and per-chip output channels."""),
+            ("09  PROPOSE AN EQUATION", """Press Ctrl+E or choose File → Propose Equation to Chip…. Select the chip, enter a name, and write an expression such as:\n\n    y = Σᵢ wᵢxᵢ + b\n\nPROPOSE TO CHIP adds the expression to the live equation stream, records the target chip, opens an answer/time report, and persists that report in the JSON save."""),
+            ("10  RUN THE COMPUTER", """Press Ctrl+P or choose File → Edit / Run LITHO-ISA Program…. RUN starts the shared program, STEP advances it, and STOP pauses it. The COMPUTE SPEED slider controls instructions per tick.\n\nSEND drives a value to the bus/screen. INPUT reads a value delivered by the FireWire-style link. In dual-server systems, the same source runs on four independent cores. File → Load 8-bit Computer opens the BYTEFORGE example with the LITHO-8 byte CPU."""),
+            ("11  USE EVERY GATE", """The complete gate catalog is below. Scroll this page to study every operation, particle channel, fabrication idea, and equation. Select a gate in chip scale, place it, connect its ports, then expose the chip to test the design.""" + "\n\n" + "\n".join(gate_lines)),
+            ("12  SAVE THE CHIP", """Press Ctrl+S to save the current system, or Ctrl+Shift+S for Save As. The JSON includes voxels, layer directions, chip gates, connected ports, equations, proposals, program source, cluster settings, and UI state.\n\nYou can reload it with File → Load System from File… or:\n\n    python3 lithography_voxel_lab.py --system savegame.json\n\nWalkthrough complete: the chip now has a mask, fabricated gates, bus links, equations, executable code, and a live screen output."""),
+        ]
+
+    def show_walkthrough_step(self, step: int) -> None:
+        if not self.walkthrough_steps:
+            return
+        self.walkthrough_step = min(len(self.walkthrough_steps) - 1, max(0, step))
+        if self.walkthrough_body is not None and self.walkthrough_body.winfo_exists():
+            self.walkthrough_body.configure(state="normal")
+            self.walkthrough_body.delete("1.0", "end")
+            title, content = self.walkthrough_steps[self.walkthrough_step]
+            self.walkthrough_body.insert("1.0", title + "\n\n" + content)
+            self.walkthrough_body.configure(state="disabled")
+            self.walkthrough_body.yview_moveto(0.0)
+
+    def walkthrough_select(self, event: Optional[tk.Event] = None) -> None:
+        if self.walkthrough_list is None:
+            return
+        selected = self.walkthrough_list.curselection()
+        if selected:
+            self.show_walkthrough_step(selected[0])
+
+    def walkthrough_next(self) -> None:
+        self.show_walkthrough_step(self.walkthrough_step + 1)
+        if self.walkthrough_list is not None:
+            self.walkthrough_list.selection_clear(0, "end")
+            self.walkthrough_list.selection_set(self.walkthrough_step)
+            self.walkthrough_list.see(self.walkthrough_step)
+
+    def walkthrough_previous(self) -> None:
+        self.show_walkthrough_step(self.walkthrough_step - 1)
+        if self.walkthrough_list is not None:
+            self.walkthrough_list.selection_clear(0, "end")
+            self.walkthrough_list.selection_set(self.walkthrough_step)
+            self.walkthrough_list.see(self.walkthrough_step)
+
+    def apply_walkthrough_step(self) -> None:
+        step = self.walkthrough_step
+        if step == 0:
+            self.view = "macro"
+            self.topdown = True
+            self.active_layer = 1
+            self.place_preset_widgets()
+            self.model.last_event = "WALKTHROUGH // top-down L1 workbench enabled"
+        elif step in {1, 4}:
+            self.topdown = True
+            self.enter_chip_mode(self.nearest_chip())
+        elif step == 8:
+            self.open_equation_console()
+        elif step == 9:
+            self.open_program_editor()
+        elif step == 11:
+            self.save_game(save_as=False)
+        else:
+            self.model.last_event = f"WALKTHROUGH // step {step + 1:02d} applied"
+        self.draw(include_monitor=True)
+
+    def open_walkthrough(self) -> None:
+        if self.walkthrough_window is not None and self.walkthrough_window.winfo_exists():
+            self.walkthrough_window.deiconify()
+            self.walkthrough_window.lift()
+            return
+        self.topdown = True
+        self.view = "macro"
+        self.place_preset_widgets()
+        self.model.last_event = "WALKTHROUGH // top-down chip fabrication guide opened"
+        self.walkthrough_steps = self._walkthrough_content()
+        self.walkthrough_step = 0
+        window = tk.Toplevel(self.root)
+        self.walkthrough_window = window
+        window.title("LITHOGRAPHY // Guided Top-Down Chip Walkthrough")
+        window.geometry("1050x720")
+        window.minsize(780, 560)
+        window.configure(bg=self.PANEL)
+        window.transient(self.root)
+        window.protocol("WM_DELETE_WINDOW", self._close_walkthrough)
+
+        header = tk.Frame(window, bg=self.PANEL)
+        header.pack(fill="x", padx=14, pady=(12, 6))
+        tk.Label(header, text="GUIDED TOP-DOWN CHIP FABRICATION", bg=self.PANEL, fg=self.CYAN, font=("TkFixedFont", 14, "bold")).pack(anchor="w")
+        tk.Label(header, text="Follow the creation path from infinite PCB material to a working multi-gate chip. Apply steps to the live viewport as you go.", bg=self.PANEL, fg=self.MUTED, font=("TkFixedFont", 8)).pack(anchor="w", pady=(4, 0))
+
+        body = tk.Frame(window, bg=self.PANEL)
+        body.pack(fill="both", expand=True, padx=14, pady=6)
+        list_frame = tk.Frame(body, bg="#071820", width=260)
+        list_frame.pack(side="left", fill="y", padx=(0, 8))
+        list_frame.pack_propagate(False)
+        tk.Label(list_frame, text="FABRICATION PATH", bg="#071820", fg=self.MUTED, font=("TkFixedFont", 8, "bold"), anchor="w", padx=10, pady=8).pack(fill="x")
+        self.walkthrough_list = tk.Listbox(list_frame, bg="#06131b", fg=self.TEXT, selectbackground="#285d69", selectforeground="#ffffff", relief="flat", bd=0, font=("TkFixedFont", 8), activestyle="none", exportselection=False)
+        for title, _ in self.walkthrough_steps:
+            self.walkthrough_list.insert("end", title)
+        self.walkthrough_list.pack(fill="both", expand=True, padx=6, pady=(0, 6))
+        self.walkthrough_list.bind("<<ListboxSelect>>", self.walkthrough_select)
+
+        content_frame = tk.Frame(body, bg=self.PANEL)
+        content_frame.pack(side="left", fill="both", expand=True)
+        scroll = tk.Scrollbar(content_frame, orient="vertical")
+        self.walkthrough_body = tk.Text(content_frame, wrap="word", yscrollcommand=scroll.set, bg="#06131b", fg="#d8e7ef", insertbackground=self.CYAN, selectbackground="#285d69", relief="flat", bd=0, font=("TkFixedFont", 10), padx=16, pady=14)
+        scroll.configure(command=self.walkthrough_body.yview)
+        scroll.pack(side="right", fill="y")
+        self.walkthrough_body.pack(side="left", fill="both", expand=True)
+
+        controls = tk.Frame(window, bg=self.PANEL)
+        controls.pack(fill="x", padx=14, pady=(2, 5))
+        button_style = {"bg": "#15313b", "fg": self.TEXT, "activebackground": "#2d5c68", "activeforeground": "#ffffff", "relief": "flat", "font": ("TkFixedFont", 8, "bold"), "padx": 11}
+        tk.Button(controls, text="← BACK", command=self.walkthrough_previous, **button_style).pack(side="left", padx=(0, 5))
+        tk.Button(controls, text="NEXT →", command=self.walkthrough_next, **button_style).pack(side="left", padx=(0, 5))
+        tk.Button(controls, text="APPLY TO VIEWPORT", command=self.apply_walkthrough_step, **button_style).pack(side="left", padx=(12, 5))
+        tk.Label(controls, text="T top-down  ·  Z chip scale  ·  Ctrl+E equations  ·  Ctrl+P code", bg=self.PANEL, fg=self.MUTED, font=("TkFixedFont", 8)).pack(side="left", padx=10)
+        tk.Button(controls, text="CLOSE", command=self._close_walkthrough, **button_style).pack(side="right")
+
+        self.walkthrough_list.selection_set(0)
+        self.show_walkthrough_step(0)
+
+    def _close_walkthrough(self) -> None:
+        if self.walkthrough_window is not None and self.walkthrough_window.winfo_exists():
+            self.walkthrough_window.destroy()
+        self.walkthrough_window = None
+        self.walkthrough_body = None
+        self.walkthrough_list = None
+        self.walkthrough_steps = []
+
+    def refresh_equation_console(self) -> None:
+        if self.equation_proposal_list is None or not self.equation_proposal_list.winfo_exists():
+            return
+        self.equation_proposal_list.delete(0, "end")
+        for proposal in self.model.equation_proposals:
+            answer = proposal.get("answer", "SYMBOLIC")
+            elapsed = proposal.get("elapsed_ms", "—")
+            self.equation_proposal_list.insert(
+                "end",
+                f"{proposal['chip']} // {proposal['name']}: {proposal['expression']}  =>  {answer}  [{elapsed} ms]",
+            )
+
+    def submit_equation_proposal(self) -> None:
+        if self.equation_chip_var is None or self.equation_name_entry is None or self.equation_expression_widget is None:
+            return
+        chip_code = self.equation_chip_var.get()
+        name = self.equation_name_entry.get()
+        expression = self.equation_expression_widget.get("1.0", "end-1c")
+        try:
+            proposal = self.model.propose_equation(chip_code, name, expression)
+        except ValueError as exc:
+            if self.equation_status is not None:
+                self.equation_status.configure(text=f"REJECTED // {exc}", fg=self.RED)
+            messagebox.showerror("Equation Proposal", str(exc), parent=self.equation_window)
+            return
+        answer = proposal.get("answer", "SYMBOLIC")
+        elapsed_ms = proposal.get("elapsed_ms", "—")
+        if self.equation_status is not None:
+            self.equation_status.configure(text=f"REPORTED // {proposal['chip']} // answer {answer} // {elapsed_ms} ms", fg=self.GREEN)
+        self.equation_expression_widget.delete("1.0", "end")
+        self.refresh_equation_console()
+        self.draw_monitor()
+        messagebox.showinfo(
+            "Equation Report",
+            f"CHIP: {proposal['chip']}\nNAME: {proposal['name']}\nEXPRESSION: {proposal['expression']}\n\nANSWER: {answer}\nEVALUATION TIME: {elapsed_ms} ms\n\nThe answer is a deterministic simulator sample; symbolic quantum notation is reported as symbolic.",
+            parent=self.equation_window,
+        )
+
+    def open_screen_output(self) -> None:
+        if self.screen_output_window is not None and self.screen_output_window.winfo_exists():
+            self.screen_output_window.deiconify()
+            self.screen_output_window.lift()
+            self.draw_screen_output()
+            return
+        window = tk.Toplevel(self.root)
+        self.screen_output_window = window
+        window.title("LITHOGRAPHY // SCREEN OUTPUT // 512x512")
+        window.geometry("548x560")
+        window.resizable(False, False)
+        window.configure(bg=self.PANEL)
+        window.transient(self.root)
+        window.protocol("WM_DELETE_WINDOW", self._close_screen_output)
+        tk.Label(window, text="COMPUTER DISPLAY // FIXED 512×512 OUTPUT", bg=self.PANEL, fg=self.CYAN, font=("TkFixedFont", 9, "bold")).pack(fill="x", padx=14, pady=(10, 5))
+        self.screen_output_canvas = tk.Canvas(window, width=512, height=512, bg="#020a10", highlightthickness=0, bd=0)
+        self.screen_output_canvas.pack(padx=18, pady=(0, 12))
+        self.draw_screen_output()
+
+    def _close_screen_output(self) -> None:
+        if self.screen_output_window is not None and self.screen_output_window.winfo_exists():
+            self.screen_output_window.destroy()
+        self.screen_output_window = None
+        self.screen_output_canvas = None
+
+    def open_equation_console(self) -> None:
+        if self.equation_window is not None and self.equation_window.winfo_exists():
+            self.equation_window.deiconify()
+            self.equation_window.lift()
+            return
+        window = tk.Toplevel(self.root)
+        self.equation_window = window
+        window.title("LITHOGRAPHY // Equation Proposal Console")
+        window.geometry("760x520")
+        window.minsize(600, 420)
+        window.configure(bg=self.PANEL)
+        window.transient(self.root)
+        window.protocol("WM_DELETE_WINDOW", self._close_equation_console)
+
+        header = tk.Frame(window, bg=self.PANEL)
+        header.pack(fill="x", padx=14, pady=(12, 7))
+        tk.Label(header, text="EQUATION PROPOSAL CONSOLE", bg=self.PANEL, fg="#d6a7ff", font=("TkFixedFont", 13, "bold")).pack(anchor="w")
+        tk.Label(header, text="Submit a mathematical proposal to a chip. It is validated, added to the live equation stream, and persisted with the system JSON.", bg=self.PANEL, fg=self.MUTED, justify="left", wraplength=720, font=("TkFixedFont", 8)).pack(anchor="w", pady=(4, 0))
+
+        form = tk.Frame(window, bg=self.PANEL)
+        form.pack(fill="x", padx=14, pady=4)
+        tk.Label(form, text="CHIP", bg=self.PANEL, fg=self.MUTED, font=("TkFixedFont", 8, "bold")).grid(row=0, column=0, sticky="w", padx=(0, 6), pady=3)
+        chip_codes = [chip.code for chip in CHIPS]
+        self.equation_chip_var = tk.StringVar(window, value=self.active_chip_code if self.active_chip_code in chip_codes else chip_codes[0])
+        chip_menu = tk.OptionMenu(form, self.equation_chip_var, *chip_codes)
+        chip_menu.configure(bg="#15313b", fg=self.TEXT, activebackground="#2d5c68", activeforeground="#ffffff", highlightthickness=0, relief="flat", font=("TkFixedFont", 8, "bold"))
+        chip_menu["menu"].configure(bg="#0d1c26", fg=self.TEXT, activebackground="#2d5c68", activeforeground="#ffffff", font=("TkFixedFont", 8))
+        chip_menu.grid(row=0, column=1, sticky="w", padx=(0, 16), pady=3)
+        tk.Label(form, text="NAME", bg=self.PANEL, fg=self.MUTED, font=("TkFixedFont", 8, "bold")).grid(row=0, column=2, sticky="w", padx=(0, 6), pady=3)
+        self.equation_name_entry = tk.Entry(form, bg="#06131b", fg=self.TEXT, insertbackground=self.CYAN, relief="flat", font=("TkFixedFont", 9), width=34)
+        self.equation_name_entry.insert(0, "PROPOSED EQUATION")
+        self.equation_name_entry.grid(row=0, column=3, sticky="ew", pady=3)
+        form.columnconfigure(3, weight=1)
+
+        tk.Label(window, text="EXPRESSION", bg=self.PANEL, fg=self.MUTED, font=("TkFixedFont", 8, "bold")).pack(anchor="w", padx=14, pady=(8, 3))
+        expression_frame = tk.Frame(window, bg=self.PANEL)
+        expression_frame.pack(fill="x", padx=14)
+        self.equation_expression_widget = tk.Text(expression_frame, height=3, wrap="word", bg="#06131b", fg="#d8e7ef", insertbackground=self.CYAN, selectbackground="#285d69", relief="flat", font=("TkFixedFont", 10), padx=10, pady=8)
+        self.equation_expression_widget.pack(fill="x", expand=True)
+        self.equation_expression_widget.insert("1.0", "y = Σᵢ wᵢ xᵢ + b")
+
+        controls = tk.Frame(window, bg=self.PANEL)
+        controls.pack(fill="x", padx=14, pady=8)
+        button_style = {"bg": "#15313b", "fg": self.TEXT, "activebackground": "#2d5c68", "activeforeground": "#ffffff", "relief": "flat", "font": ("TkFixedFont", 8, "bold"), "padx": 12}
+        tk.Button(controls, text="PROPOSE TO CHIP", command=self.submit_equation_proposal, **button_style).pack(side="left")
+        tk.Label(controls, text="Ctrl+E opens this console", bg=self.PANEL, fg=self.MUTED, font=("TkFixedFont", 8)).pack(side="left", padx=12)
+
+        tk.Label(window, text="PROPOSAL STREAM // SAVED WITH SYSTEM", bg=self.PANEL, fg=self.MUTED, font=("TkFixedFont", 8, "bold")).pack(anchor="w", padx=14, pady=(4, 3))
+        list_frame = tk.Frame(window, bg=self.PANEL)
+        list_frame.pack(fill="both", expand=True, padx=14, pady=(0, 8))
+        list_scroll = tk.Scrollbar(list_frame, orient="vertical")
+        self.equation_proposal_list = tk.Listbox(list_frame, yscrollcommand=list_scroll.set, bg="#06131b", fg="#d6a7ff", selectbackground="#285d69", relief="flat", bd=0, font=("TkFixedFont", 9), height=8)
+        list_scroll.configure(command=self.equation_proposal_list.yview)
+        list_scroll.pack(side="right", fill="y")
+        self.equation_proposal_list.pack(side="left", fill="both", expand=True)
+        self.refresh_equation_console()
+        self.equation_status = tk.Label(window, text="READY // proposals are sent to the selected chip", anchor="w", bg="#071820", fg=self.GREEN, font=("TkFixedFont", 8), padx=14, pady=7)
+        self.equation_status.pack(fill="x", padx=14, pady=(0, 8))
+
+    def _close_equation_console(self) -> None:
+        if self.equation_window is not None and self.equation_window.winfo_exists():
+            self.equation_window.destroy()
+        self.equation_window = None
+        self.equation_chip_var = None
+        self.equation_name_entry = None
+        self.equation_expression_widget = None
+        self.equation_proposal_list = None
+        self.equation_status = None
 
     def update_program_editor_status(self) -> None:
         if self.program_editor_status is not None and self.program_editor_status.winfo_exists():
@@ -2888,7 +3916,7 @@ class LithoLab:
         tk.Label(header, text="LITHO-ISA PROGRAM CONSOLE", bg=self.PANEL, fg=self.CYAN, font=("TkFixedFont", 13, "bold")).pack(anchor="w")
         tk.Label(
             header,
-            text="A tiny signal language for the fabricated computer: registers, noisy observation, Bayesian math, bus output, loops, and quantum-style operations.",
+            text=f"{self.model.program_architecture} // registers, memory, flags, bus output, loops, and quantum-style operations. LITHO-8 adds a 256-byte memory and byte CPU.",
             bg=self.PANEL, fg=self.MUTED, justify="left", wraplength=780, font=("TkFixedFont", 8),
         ).pack(anchor="w", pady=(4, 0))
 
@@ -2942,6 +3970,8 @@ class LithoLab:
         try:
             data = load_system_file(str(filename))
             self.model = LabModel(data)
+            if self.equation_window is not None and self.equation_window.winfo_exists():
+                self._close_equation_console()
             self.root.title(self.model.system_name)
             self.active_chip_code = CHIPS[0].code
             self.active_layer = 1
@@ -2954,6 +3984,7 @@ class LithoLab:
             self.camera_y = self.player_y
             ui_state = data.get("state", {}).get("ui", {}) if isinstance(data.get("state", {}), dict) else {}
             self.zoom = min(6.0, max(0.25, float(ui_state.get("zoom", 1.0)))) if isinstance(ui_state, dict) else 1.0
+            self.build_direction = normalize_direction(ui_state.get("direction", ui_state.get("rotation", "east"))) if isinstance(ui_state, dict) else "east"
             self.selected_preset = None
             self.preset_var.set("FREE BUILD")
             self.save_path = filename.with_name("savegame.json")
@@ -2965,6 +3996,7 @@ class LithoLab:
                 self.update_program_editor_status()
             self.place_preset_widgets()
             self.model.last_event = f"LOAD PASS // {filename.name} // {len(CHIPS)} chips online"
+            self.draw_monitor()
         except (OSError, json.JSONDecodeError, ValueError) as exc:
             messagebox.showerror("Load System", f"Could not load {filename.name}:\n{exc}")
 
@@ -2999,6 +4031,7 @@ class LithoLab:
             "active_chip": self.active_chip_code,
             "preset": self.selected_preset,
             "direction": self.build_direction,
+            "rotation": direction_rotation(self.build_direction),
             "zoom": self.zoom,
         })
         self.model.last_event = f"SAVE PASS // {filename.name}"
@@ -3018,6 +4051,15 @@ class LithoLab:
         if key == "p" and (event.state & 0x0004):
             self.open_program_editor()
             return
+        if key == "e" and (event.state & 0x0004):
+            self.open_equation_console()
+            return
+        if key == "f1":
+            self.open_walkthrough()
+            return
+        if key == "f2":
+            self.open_screen_output()
+            return
         if key.isdigit() and key != "0":
             index = int(key) - 1
             if self.view == "chip" and index < len(GATE_ORDER):
@@ -3028,8 +4070,8 @@ class LithoLab:
             self.selected = MATERIAL_ORDER[9]
         elif key in {"q", "e"} and self.view != "chip":
             self.cycle_choice(-1 if key == "q" else 1)
-        elif key == "r" and self.view == "macro":
-            self.build_direction = DIRECTIONS[(DIRECTIONS.index(self.build_direction) + 1) % len(DIRECTIONS)]
+        elif key == "r" and self.view in {"macro", "chip"}:
+            self.build_direction = DIRECTIONS[(DIRECTIONS.index(normalize_direction(self.build_direction)) + 1) % len(DIRECTIONS)]
             self.model.last_event = f"DIRECTION // {self.build_direction.upper()}"
         elif key == "t" and self.view == "macro":
             self.topdown = not self.topdown
