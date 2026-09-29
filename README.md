@@ -1,0 +1,139 @@
+# Lithography Voxel Lab
+
+`Lithography Voxel Lab` is a playable Python prototype for a voxel-style chip fabrication game. You are an engineer reduced to a particle-scale avatar inside a PCB lab. Build lithography patterns for four chips, route their shared bus, and watch the live monitor respond as the virtual computer runs.
+
+## Run
+
+From this folder:
+
+```bash
+python3 lithography_voxel_lab.py
+```
+
+The built-in `AURORA FAB // WORKING COMPUTER` boots already connected: all four chips, gates, ports, layered bus traces, lithography fields, and the live screen output are online immediately. Use it as a running reference system, or load a custom JSON to start a fresh fabrication job.
+
+Load a generated system from JSON:
+
+```bash
+python3 lithography_voxel_lab.py --system example_system.json
+# or: python3 lithography_voxel_lab.py example_system.json
+```
+
+A separate quantum reference system is included:
+
+```bash
+python3 lithography_voxel_lab.py --system quantum_system.json
+```
+
+The third quick-load option is a parallel SIMD computer:
+
+```bash
+python3 lithography_voxel_lab.py --system parallel_system.json
+```
+
+While the simulator is running, use **File → Load System from File…** or `Ctrl+O` to choose any system JSON. The File menu also contains quick loaders for the neural, quantum, and parallel examples, plus Save and Save As.
+
+It uses only Python's standard library and Tkinter. On Debian/Ubuntu, install Tkinter if it is missing:
+
+```bash
+sudo apt install python3-tk
+```
+
+Run the logic check without opening a window:
+
+```bash
+python3 lithography_voxel_lab.py --self-test
+```
+
+## Controls
+
+- `WASD` or arrow keys: move the engineer particle
+- `F`: toggle flight mode; `Space`/`Shift` change altitude while flying
+- `1`–`4`: select silicon, copper, resist, or mask on the PCB floor
+- Left click: deposit the selected voxel material
+- Right click: break the upper voxel and recover its material
+- `Z`: enter chip scale for the nearest chip; `Esc`/`Z`: return to the fab floor
+- In chip scale, `1`–`4` select SOURCE, AND, OR, or NOT gates
+- In chip scale, left click snaps a gate into a grid slot; right click removes it
+- In chip scale, click a face connector block to link/unlink a bus slot
+- `L`: expose the active chip or the most complete macro pattern
+- `Esc`: quit from the macro view
+
+The included [example_system.json](/home/jdaj/Downloads/lithography_voxel_lab/example_system.json) is a complete layered neural computer. It models a sensory cortex, synaptic core, spike-threshold unit, recurrent memory, and motor-output chip connected by a three-layer synapse bus. Run `python3 lithography_voxel_lab.py --system example_system.json` from this folder. The loader reads system metadata, an ordered bus path for every layer, starter traces, vertical `connections`, and any number of chips. Each chip can define a relative lithography `pattern`, per-face `face_slots`, a `gate_target`, and optional `initial_gates` / `connected_ports`; the game builds the board and chip queue automatically on launch.
+
+The macro board is logically infinite. Use `PageUp` / `PageDown` to switch fabric layers; bright dashed vertical lines and labeled endpoint dots show vias and connections passing through layers. The mouse wheel zooms the board in both isometric and top-down modes around the cursor; `+`/`-` zoom around the viewport center, and `Ctrl`+wheel remains available for fast block selection. JSON `lithography.fields` creates massive viewport-rendered mask arrays with field boundaries, repeating patterns, and PCB tap lines. The **SYSTEM OUTPUT // LIVE** HUD reports the active bus, chip paths, port links, and total lithography loci. Flight mode lets you move the particle across the unbounded grid.
+
+The right-side **BUS MONITOR // LIVE** is the game's input/output screen. It shows bus health, clock, thermal load, pipeline state, chip queue progress, gate counts, face-port counts, exposure results, and a live binary stream. The **COMPUTE SPEED** slider in the world header controls LITHO-ISA instructions per tick (1–512); the same control is available in the program editor. The sidebar has its own scrollbar: scroll over it or drag the bar at the far right. Its lower **GRAPHICAL OUTPUT // LIVE CARRIER PLOT** shows the animated signal waveform, moving particles on each bus layer, and live per-chip output levels. Each chip is a multi-slot item: its north/east/south/west faces expose one visible connector block per bus connection.
+
+The macro fab now has two construction views: press `T` for a square-cell top-down builder, or press `T` again to return to the isometric voxel view. Top-down building is snapped directly to the selected layer and is easier for large lithography layouts. The palette includes silicon, copper, resist, mask, dielectric, gold, N-type, P-type, and via blocks. Use `Q`/`E` to cycle blocks, number keys when available, and `PageUp`/`PageDown` to change layers.
+
+The simulator uses infinite construction stock by default: every material and particle gate can be placed repeatedly, and the HUD shows `∞` instead of a finite inventory. The lower-right framed **SCREEN OUTPUT // LIVE** panel is the actual simulator output surface; it receives the loaded system's output message, bus bitstream, field/layer totals, chip status, animated signal trace, and any JSON `equations` as rotating live equation examples.
+
+Scroll the mouse wheel to cycle block types; in chip scale it cycles particle gates.
+
+The block palette is now paged and scrollable: use its scrollbar, hover over the options area and scroll, or use `Q`/`E`. The quantum set includes Qubit, Photon, Electron, Positron, Muon, Neutrino, Quark, Gluon, Boson, Anyon, Exciton, and Polariton blocks. The chip-scale gate list also includes Hadamard, CNOT, Phase, T, SWAP, Toffoli, Measure, Bell, Controlled Phase, sqrt-SWAP, iSWAP, Fredkin, Parity, Weak Measure, Anyon Braid, Magic State, Teleport, Dephase, and QFT gates. Each new gate shows its particle carriers, fabrication recipe, and equation in the chip HUD.
+
+## Saving
+
+Press `Ctrl+S` during play to save the current system to `savegame.json` beside the Python file. This includes placed voxels, layers, gates, bus ports, chip results, and player UI state. Press `Ctrl+Shift+S` for a Save As dialog. Load the save exactly like an example:
+
+```bash
+python3 lithography_voxel_lab.py --system savegame.json
+```
+
+The material palette also includes quantum quasiparticles such as **phonon**, magnon, plasmon, hole, Cooper pair, Majorana, fluxon, ion, and dark photon. It also includes dedicated **Noise Source**, **Observer**, **Bayesian**, and **Consensus** materials. The neural example's **BAYESIAN OBSERVATION ENGINE** chip maps to `maze_flask.py`: its physical stages represent `observe`, `upward_pass`, `downward_pass`, `deep_obs`, and `plan_path`, and its screen output reports the posterior/deep-observation stream. The **MATERIAL GATE PRESET** dropdown above the build palette stamps complete multi-block assemblies such as CMOS Inverter, NAND Cell, Quantum H, CNOT Tile, Bell Pair, Ion Trap, Superconducting, and Photonic Mux. Choose `FREE BUILD` to return to single-block placement.
+
+Directional blocks now show restrained route arrows. Press `R` to rotate the placement direction through east, south, west, and north. Active conductive/quantum blocks pulse and glow with the live bus; inactive blocks remain dim with a static direction marker. The live packet is the primary notifier: its arrowhead follows the current bus segment and updates direction on every hop, including corners and diagonal transitions. Presets stamp every block with the selected orientation, and saved JSON preserves those directions.
+
+## Dual-computer server mode
+
+The built-in, neural, and quantum systems run as a four-lane shared program cluster: `FAB-A` / `Q-SERVER-A` has two cores and `FAB-B` / `Q-SERVER-B` has two cores. Every lane receives the same compiled LITHO-ISA source but owns separate registers and a program counter. The two computers exchange their averaged `SEND` value over a simulated FireWire-style `FIRELINK` with configurable tick latency; `INPUT` reads the value delivered by that link.
+
+A JSON system enables it with:
+
+```json
+"cluster": {
+  "enabled": true,
+  "shared_memory": true,
+  "link": {"type": "firewire", "name": "FIRELINK-A/B", "latency_ticks": 2},
+  "computers": [
+    {"name": "FAB-A", "role": "primary", "cores": 2},
+    {"name": "FAB-B", "role": "replica", "cores": 2}
+  ]
+}
+```
+
+The live program strip reports `DUAL-SERVER`, active core count, link type, latency, and transfer count. This is a deterministic simulator model of a high-speed interconnect, not an attempt to access real FireWire hardware.
+
+## Programming the computer
+
+Open **File → Edit / Run LITHO-ISA Program…** or press `Ctrl+P`. The editor accepts source directly, with `RUN`, `STEP`, `STOP`, `RESET`, `.litho` load/save, and an **instructions/frame** speed control. The runtime executes many instructions per rendered frame, so increasing speed accelerates the computer without multiplying canvas redraw work.
+
+The core instruction set is: `CONST`, `MOV`, `ADD`, `SUB`, `MUL`, `DIV`, `CLAMP`, `INC`, `DEC`, `NOISE`, `OBSERVE`, `BAYES`, `HADAMARD`, `MEASURE`, `SEND`, `PRINT`, `WAIT`, `JMP`, `JNZ`, `JZ`, and `HALT`. The invented quantum operations are `CPHASE`, `SQRTSWAP`, `ISWAP`, `FREDKIN`, `PARITY`, `WEAKMEASURE`, `BRAID`, `MAGICSTATE`, `TELEPORT`, `DEPHASE`, and `QFT`. Lines beginning with `;` or `#` are comments. Registers are `R0` through `R15`.
+
+A JSON system can provide the program directly:
+
+```json
+"program": {
+  "language": "LITHO-ISA",
+  "auto_start": true,
+  "speed": 32,
+  "source": "CONST R0 0\nHADAMARD R1 R0\nSEND R1\nPRINT \"Q\" R1"
+}
+```
+
+`SEND` drives the program value into the live bus/screen telemetry, and `PRINT` appears in the program strip above the graphical output panel. The quantum example includes a running program using `HADAMARD`, `CPHASE`, `WEAKMEASURE`, and noise before sending its result to `Q-BUS`. The parallel example adds `LANE R0`: the same source runs on all four workers, but `R0` becomes lane `0`, `1`, `2`, or `3`, allowing each worker to calculate a separate slice before using `SEND`/`INPUT` across the shared link.
+
+## Quantum fabrication
+
+The new quantum gates are invented process recipes rather than claims about a physical manufacturing flow. Each recipe combines the particle materials already in the palette with a lithographic structure: waveguides, phase rails, resonators, topological braid tracks, zero-mode islands, or feed-forward vias. In chip scale, scroll the **PARTICLE GATES** bar to select a gate; the `Q-FAB` line shows its particles, process idea, and equation. The **MATERIAL GATE PRESET** dropdown stamps the corresponding material assembly on the infinite board.
+
+Examples include `CONTROLLED PHASE` (photon + fluxon junction), `SQRT SWAP` (exciton + phonon bridge), `iSWAP` (electron + hole phase rail), `ANYON BRAID` (anyon + Majorana tracks), `WEAK MEASURE` (photon + phonon resonator), `MAGIC STATE` (Majorana zero-mode island), `TELEPORT` (Bell source plus feed-forward via), and `QFT` (polariton/plasmon phase stack).
+
+## Parallel SIMD example
+
+[parallel_system.json](/home/jdaj/Downloads/lithography_voxel_lab/parallel_system.json) is a third default system option. It has four SIMD lithography fields, a three-layer crossbar, a reduction chip, and a screen-output chip. `PARA-SERVER-A` and `PARA-SERVER-B` each contribute two cores. The shared program calculates a lane-specific value, exchanges it through `PARA-FIRELINK-A/B`, and displays the lane result in the live monitor.
+
+## Performance
+
+The renderer uses a separate fast input/simulation tick and a throttled canvas composition pass. The world redraws every other tick, while the sidebar graph refreshes less often. Movement is elapsed-time based and key auto-repeat is ignored, so slow frames no longer build a movement queue.

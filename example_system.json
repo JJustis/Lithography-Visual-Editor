@@ -1,0 +1,1012 @@
+{
+  "system": {
+    "name": "NEUROFAB // SPIKE + BAYESIAN COMPUTER",
+    "bus_name": "SYNAPSE-BUS",
+    "clock_ghz": 3.2
+  },
+  "board": {
+    "width": 32,
+    "height": 20
+  },
+  "bus": {
+    "layers": {
+      "1": {
+        "path": [
+          [
+            -8,
+            6
+          ],
+          [
+            -7,
+            6
+          ],
+          [
+            -6,
+            6
+          ],
+          [
+            -5,
+            6
+          ],
+          [
+            -4,
+            6
+          ],
+          [
+            -3,
+            6
+          ],
+          [
+            -2,
+            6
+          ],
+          [
+            -1,
+            6
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            7,
+            6
+          ],
+          [
+            8,
+            6
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            10,
+            6
+          ],
+          [
+            11,
+            6
+          ],
+          [
+            12,
+            6
+          ],
+          [
+            13,
+            6
+          ],
+          [
+            14,
+            6
+          ],
+          [
+            15,
+            6
+          ],
+          [
+            16,
+            6
+          ],
+          [
+            17,
+            6
+          ],
+          [
+            18,
+            6
+          ],
+          [
+            19,
+            6
+          ],
+          [
+            20,
+            6
+          ],
+          [
+            21,
+            6
+          ],
+          [
+            22,
+            6
+          ],
+          [
+            23,
+            6
+          ],
+          [
+            24,
+            6
+          ],
+          [
+            25,
+            6
+          ],
+          [
+            26,
+            6
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            5,
+            9
+          ],
+          [
+            5,
+            10
+          ],
+          [
+            5,
+            11
+          ]
+        ],
+        "starting_traces": [
+          [
+            -8,
+            6
+          ],
+          [
+            -7,
+            6
+          ],
+          [
+            -6,
+            6
+          ],
+          [
+            -5,
+            6
+          ],
+          [
+            -4,
+            6
+          ],
+          [
+            -3,
+            6
+          ],
+          [
+            -2,
+            6
+          ],
+          [
+            -1,
+            6
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            6
+          ]
+        ]
+      },
+      "2": {
+        "path": [
+          [
+            5,
+            1
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            5,
+            4
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            5,
+            9
+          ],
+          [
+            5,
+            10
+          ],
+          [
+            5,
+            11
+          ],
+          [
+            5,
+            12
+          ]
+        ],
+        "starting_traces": [
+          [
+            5,
+            4
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            5,
+            7
+          ]
+        ]
+      },
+      "3": {
+        "path": [
+          [
+            -2,
+            13
+          ],
+          [
+            -1,
+            13
+          ],
+          [
+            0,
+            13
+          ],
+          [
+            1,
+            13
+          ],
+          [
+            2,
+            13
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            4,
+            13
+          ],
+          [
+            5,
+            13
+          ],
+          [
+            6,
+            13
+          ],
+          [
+            7,
+            13
+          ],
+          [
+            8,
+            13
+          ],
+          [
+            9,
+            13
+          ],
+          [
+            10,
+            13
+          ],
+          [
+            11,
+            13
+          ],
+          [
+            12,
+            13
+          ],
+          [
+            13,
+            13
+          ],
+          [
+            14,
+            13
+          ],
+          [
+            15,
+            13
+          ]
+        ],
+        "starting_traces": [
+          [
+            2,
+            13
+          ],
+          [
+            3,
+            13
+          ],
+          [
+            4,
+            13
+          ],
+          [
+            5,
+            13
+          ]
+        ]
+      }
+    },
+    "connections": [
+      {
+        "cell": [
+          5,
+          6
+        ],
+        "layers": [
+          1,
+          2,
+          3
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          12,
+          6
+        ],
+        "layers": [
+          1,
+          3
+        ],
+        "material": "copper"
+      },
+      {
+        "cell": [
+          5,
+          11
+        ],
+        "layers": [
+          1,
+          2
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          9,
+          13
+        ],
+        "layers": [
+          2,
+          3
+        ],
+        "material": "copper"
+      }
+    ]
+  },
+  "lithography": {
+    "fields": [
+      {
+        "name": "SENSORY DENDRITE ARRAY",
+        "origin": [
+          -8,
+          -3
+        ],
+        "size": [
+          12,
+          8
+        ],
+        "layer": 1,
+        "pattern": "crosshatch",
+        "pitch": 2,
+        "tint": "#55dce0",
+        "bus_taps": [
+          [
+            0,
+            6
+          ],
+          [
+            3,
+            6
+          ]
+        ]
+      },
+      {
+        "name": "SYNAPTIC WEIGHT MESH",
+        "origin": [
+          4,
+          -3
+        ],
+        "size": [
+          13,
+          12
+        ],
+        "layer": 2,
+        "pattern": "grid",
+        "pitch": 1,
+        "tint": "#b98cff",
+        "bus_taps": [
+          [
+            5,
+            6
+          ],
+          [
+            5,
+            9
+          ]
+        ]
+      },
+      {
+        "name": "RECURRENT MEMORY FIELD",
+        "origin": [
+          0,
+          9
+        ],
+        "size": [
+          18,
+          8
+        ],
+        "layer": 3,
+        "pattern": "checker",
+        "pitch": 2,
+        "tint": "#ff6f91",
+        "bus_taps": [
+          [
+            9,
+            13
+          ],
+          [
+            14,
+            13
+          ]
+        ]
+      },
+      {
+        "name": "BAYESIAN OBSERVATION FIELD",
+        "origin": [
+          17,
+          -3
+        ],
+        "size": [
+          12,
+          9
+        ],
+        "layer": 1,
+        "pattern": "crosshatch",
+        "pitch": 1,
+        "tint": "#ff5f91",
+        "bus_taps": [
+          [
+            19,
+            6
+          ],
+          [
+            24,
+            6
+          ]
+        ]
+      }
+    ]
+  },
+  "output": {
+    "screen_name": "NEURAL ACTIVITY // BAYESIAN OBSERVATION LIVE",
+    "idle_message": "noise field / posterior stream running"
+  },
+  "infinite_supply": true,
+  "boot_working": true,
+  "chips": [
+    {
+      "name": "SENSORY CORTEX",
+      "code": "N-01",
+      "anchor": [
+        -2,
+        1
+      ],
+      "pattern": {
+        "0,0": "silicon",
+        "1,0": "transistor",
+        "2,0": "n_type",
+        "0,1": "signal",
+        "1,1": "electron",
+        "2,1": "copper",
+        "0,2": "p_type",
+        "1,2": "hole",
+        "2,2": "silicon"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 3,
+        "south": 2,
+        "west": 1
+      },
+      "gate_target": 8,
+      "tint": "#55dce0",
+      "output": "sensory spike train acquired",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "source"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "and"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "or"
+        },
+        {
+          "slot": [
+            4,
+            1
+          ],
+          "gate": "not"
+        }
+      ],
+      "connected_ports": [
+        [
+          "east",
+          0
+        ],
+        [
+          "south",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "SYNAPTIC CORE",
+      "code": "N-02",
+      "anchor": [
+        5,
+        1
+      ],
+      "pattern": {
+        "0,0": "p_type",
+        "1,0": "transistor",
+        "2,0": "n_type",
+        "0,1": "electron",
+        "1,1": "quantum",
+        "2,1": "hole",
+        "0,2": "copper",
+        "1,2": "signal",
+        "2,2": "silicon"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 3,
+        "south": 2,
+        "west": 2
+      },
+      "gate_target": 9,
+      "tint": "#b98cff",
+      "output": "synaptic weights converged",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "hadamard"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "cnot"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "phase"
+        },
+        {
+          "slot": [
+            4,
+            1
+          ],
+          "gate": "bell"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "west",
+          0
+        ],
+        [
+          "east",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "SPIKE THRESHOLD UNIT",
+      "code": "N-03",
+      "anchor": [
+        12,
+        1
+      ],
+      "pattern": {
+        "0,0": "n_type",
+        "1,0": "transistor",
+        "2,0": "p_type",
+        "0,1": "phonon",
+        "1,1": "quantum",
+        "2,1": "ion",
+        "0,2": "silicon",
+        "1,2": "signal",
+        "2,2": "copper"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 2,
+        "south": 2,
+        "west": 2
+      },
+      "gate_target": 8,
+      "tint": "#ffbf69",
+      "output": "threshold crossings classified",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "source"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "and"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "or"
+        },
+        {
+          "slot": [
+            4,
+            1
+          ],
+          "gate": "measure"
+        }
+      ],
+      "connected_ports": [
+        [
+          "west",
+          0
+        ],
+        [
+          "south",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "RECURRENT MEMORY",
+      "code": "N-04",
+      "anchor": [
+        1,
+        10
+      ],
+      "pattern": {
+        "0,0": "silicon",
+        "1,0": "cooper_pair",
+        "2,0": "silicon",
+        "0,1": "copper",
+        "1,1": "qubit",
+        "2,1": "copper",
+        "0,2": "p_type",
+        "1,2": "transistor",
+        "2,2": "n_type"
+      },
+      "face_slots": {
+        "north": 3,
+        "east": 2,
+        "south": 2,
+        "west": 2
+      },
+      "gate_target": 10,
+      "tint": "#ff6f91",
+      "output": "recurrent state retained",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "swap"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "phase"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "t_gate"
+        },
+        {
+          "slot": [
+            4,
+            1
+          ],
+          "gate": "measure"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "MOTOR OUTPUT",
+      "code": "N-05",
+      "anchor": [
+        11,
+        10
+      ],
+      "pattern": {
+        "0,0": "photon",
+        "1,0": "polariton",
+        "2,0": "plasmon",
+        "0,1": "signal",
+        "1,1": "quantum",
+        "2,1": "signal",
+        "0,2": "gold",
+        "1,2": "electron",
+        "2,2": "gold"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 3,
+        "south": 1,
+        "west": 2
+      },
+      "gate_target": 8,
+      "tint": "#7cf0c5",
+      "output": "motor command waveform emitted",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "measure"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "hadamard"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "not"
+        },
+        {
+          "slot": [
+            4,
+            1
+          ],
+          "gate": "source"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "west",
+          0
+        ],
+        [
+          "east",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "BAYESIAN OBSERVATION ENGINE",
+      "code": "N-06",
+      "anchor": [
+        19,
+        1
+      ],
+      "pattern": {
+        "0,0": "noise_source",
+        "1,0": "observer",
+        "2,0": "bayes",
+        "3,0": "consensus",
+        "0,1": "electron",
+        "1,1": "quantum",
+        "2,1": "bayes",
+        "3,1": "signal",
+        "0,2": "phonon",
+        "1,2": "observer",
+        "2,2": "consensus",
+        "3,2": "transistor"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 3,
+        "south": 2,
+        "west": 2
+      },
+      "gate_target": 10,
+      "tint": "#ff5f91",
+      "output": "maze_flask.py posterior belief and deep-observation stream stable",
+      "source_file": "maze_flask.py",
+      "source_components": [
+        "HierarchicalPathfinder3D.observe",
+        "HierarchicalPathfinder3D.upward_pass",
+        "HierarchicalPathfinder3D.downward_pass",
+        "HierarchicalPathfinder3D.deep_obs",
+        "HierarchicalPathfinder3D.plan_path"
+      ],
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "source"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "and"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "hadamard"
+        },
+        {
+          "slot": [
+            4,
+            1
+          ],
+          "gate": "phase"
+        },
+        {
+          "slot": [
+            5,
+            1
+          ],
+          "gate": "measure"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "west",
+          0
+        ],
+        [
+          "east",
+          0
+        ]
+      ]
+    }
+  ],
+  "cluster": {
+    "enabled": true,
+    "shared_memory": true,
+    "link": {
+      "type": "firewire",
+      "name": "Q-FIRELINK-A/B",
+      "latency_ticks": 2,
+      "bandwidth": "shared-bus"
+    },
+    "computers": [
+      {
+        "name": "Q-SERVER-A",
+        "role": "primary",
+        "cores": 2
+      },
+      {
+        "name": "Q-SERVER-B",
+        "role": "replica",
+        "cores": 2
+      }
+    ]
+  }
+}

@@ -1,0 +1,1409 @@
+{
+  "system": {
+    "name": "PARAFAB // PARALLEL COMPUTER",
+    "bus_name": "PARA-BUS / SIMD CROSSBAR",
+    "clock_ghz": 4.8,
+    "architecture": "dual-server SIMD lithography array"
+  },
+  "board": {
+    "width": 38,
+    "height": 24
+  },
+  "bus": {
+    "layers": {
+      "1": {
+        "path": [
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            4
+          ],
+          [
+            5,
+            4
+          ],
+          [
+            6,
+            4
+          ],
+          [
+            7,
+            4
+          ],
+          [
+            8,
+            4
+          ],
+          [
+            9,
+            4
+          ],
+          [
+            10,
+            4
+          ],
+          [
+            11,
+            4
+          ],
+          [
+            12,
+            4
+          ],
+          [
+            13,
+            4
+          ],
+          [
+            14,
+            4
+          ],
+          [
+            15,
+            4
+          ],
+          [
+            16,
+            4
+          ],
+          [
+            17,
+            4
+          ],
+          [
+            18,
+            4
+          ],
+          [
+            19,
+            4
+          ],
+          [
+            20,
+            4
+          ],
+          [
+            21,
+            4
+          ],
+          [
+            22,
+            4
+          ],
+          [
+            23,
+            4
+          ],
+          [
+            24,
+            4
+          ],
+          [
+            25,
+            4
+          ],
+          [
+            26,
+            4
+          ],
+          [
+            27,
+            4
+          ],
+          [
+            28,
+            4
+          ],
+          [
+            29,
+            4
+          ],
+          [
+            30,
+            4
+          ],
+          [
+            30,
+            8
+          ],
+          [
+            30,
+            8
+          ],
+          [
+            29,
+            8
+          ],
+          [
+            28,
+            8
+          ],
+          [
+            27,
+            8
+          ],
+          [
+            26,
+            8
+          ],
+          [
+            25,
+            8
+          ],
+          [
+            24,
+            8
+          ],
+          [
+            23,
+            8
+          ],
+          [
+            22,
+            8
+          ],
+          [
+            21,
+            8
+          ],
+          [
+            20,
+            8
+          ],
+          [
+            19,
+            8
+          ],
+          [
+            18,
+            8
+          ],
+          [
+            17,
+            8
+          ],
+          [
+            16,
+            8
+          ],
+          [
+            15,
+            8
+          ],
+          [
+            14,
+            8
+          ],
+          [
+            13,
+            8
+          ],
+          [
+            12,
+            8
+          ],
+          [
+            11,
+            8
+          ],
+          [
+            10,
+            8
+          ],
+          [
+            9,
+            8
+          ],
+          [
+            8,
+            8
+          ],
+          [
+            7,
+            8
+          ],
+          [
+            6,
+            8
+          ],
+          [
+            5,
+            8
+          ],
+          [
+            4,
+            8
+          ],
+          [
+            3,
+            8
+          ],
+          [
+            2,
+            8
+          ],
+          [
+            1,
+            8
+          ],
+          [
+            0,
+            8
+          ],
+          [
+            0,
+            12
+          ],
+          [
+            0,
+            12
+          ],
+          [
+            1,
+            12
+          ],
+          [
+            2,
+            12
+          ],
+          [
+            3,
+            12
+          ],
+          [
+            4,
+            12
+          ],
+          [
+            5,
+            12
+          ],
+          [
+            6,
+            12
+          ],
+          [
+            7,
+            12
+          ],
+          [
+            8,
+            12
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            10,
+            12
+          ],
+          [
+            11,
+            12
+          ],
+          [
+            12,
+            12
+          ],
+          [
+            13,
+            12
+          ],
+          [
+            14,
+            12
+          ],
+          [
+            15,
+            12
+          ],
+          [
+            16,
+            12
+          ],
+          [
+            17,
+            12
+          ],
+          [
+            18,
+            12
+          ],
+          [
+            19,
+            12
+          ],
+          [
+            20,
+            12
+          ],
+          [
+            21,
+            12
+          ],
+          [
+            22,
+            12
+          ],
+          [
+            23,
+            12
+          ],
+          [
+            24,
+            12
+          ],
+          [
+            25,
+            12
+          ],
+          [
+            26,
+            12
+          ],
+          [
+            27,
+            12
+          ],
+          [
+            28,
+            12
+          ],
+          [
+            29,
+            12
+          ],
+          [
+            30,
+            12
+          ],
+          [
+            30,
+            16
+          ],
+          [
+            30,
+            16
+          ],
+          [
+            29,
+            16
+          ],
+          [
+            28,
+            16
+          ],
+          [
+            27,
+            16
+          ],
+          [
+            26,
+            16
+          ],
+          [
+            25,
+            16
+          ],
+          [
+            24,
+            16
+          ],
+          [
+            23,
+            16
+          ],
+          [
+            22,
+            16
+          ],
+          [
+            21,
+            16
+          ],
+          [
+            20,
+            16
+          ],
+          [
+            19,
+            16
+          ],
+          [
+            18,
+            16
+          ],
+          [
+            17,
+            16
+          ],
+          [
+            16,
+            16
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            14,
+            16
+          ],
+          [
+            13,
+            16
+          ],
+          [
+            12,
+            16
+          ],
+          [
+            11,
+            16
+          ],
+          [
+            10,
+            16
+          ],
+          [
+            9,
+            16
+          ],
+          [
+            8,
+            16
+          ],
+          [
+            7,
+            16
+          ],
+          [
+            6,
+            16
+          ],
+          [
+            5,
+            16
+          ],
+          [
+            4,
+            16
+          ],
+          [
+            3,
+            16
+          ],
+          [
+            2,
+            16
+          ],
+          [
+            1,
+            16
+          ],
+          [
+            0,
+            16
+          ]
+        ],
+        "starting_traces": [
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            4
+          ],
+          [
+            5,
+            4
+          ],
+          [
+            6,
+            4
+          ],
+          [
+            7,
+            4
+          ]
+        ]
+      },
+      "2": {
+        "path": [
+          [
+            15,
+            0
+          ],
+          [
+            15,
+            1
+          ],
+          [
+            15,
+            2
+          ],
+          [
+            15,
+            3
+          ],
+          [
+            15,
+            4
+          ],
+          [
+            15,
+            5
+          ],
+          [
+            15,
+            6
+          ],
+          [
+            15,
+            7
+          ],
+          [
+            15,
+            8
+          ],
+          [
+            15,
+            9
+          ],
+          [
+            15,
+            10
+          ],
+          [
+            15,
+            11
+          ],
+          [
+            15,
+            12
+          ],
+          [
+            15,
+            13
+          ],
+          [
+            15,
+            14
+          ],
+          [
+            15,
+            15
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            15,
+            17
+          ],
+          [
+            15,
+            18
+          ],
+          [
+            15,
+            19
+          ],
+          [
+            15,
+            20
+          ],
+          [
+            15,
+            21
+          ]
+        ],
+        "starting_traces": [
+          [
+            15,
+            3
+          ],
+          [
+            15,
+            4
+          ],
+          [
+            15,
+            5
+          ],
+          [
+            15,
+            6
+          ],
+          [
+            15,
+            7
+          ]
+        ]
+      },
+      "3": {
+        "path": [
+          [
+            5,
+            10
+          ],
+          [
+            6,
+            10
+          ],
+          [
+            7,
+            10
+          ],
+          [
+            8,
+            10
+          ],
+          [
+            9,
+            10
+          ],
+          [
+            10,
+            10
+          ],
+          [
+            11,
+            10
+          ],
+          [
+            12,
+            10
+          ],
+          [
+            13,
+            10
+          ],
+          [
+            14,
+            10
+          ],
+          [
+            15,
+            10
+          ],
+          [
+            16,
+            10
+          ],
+          [
+            17,
+            10
+          ],
+          [
+            18,
+            10
+          ],
+          [
+            19,
+            10
+          ],
+          [
+            20,
+            10
+          ],
+          [
+            21,
+            10
+          ],
+          [
+            22,
+            10
+          ],
+          [
+            23,
+            10
+          ],
+          [
+            24,
+            10
+          ],
+          [
+            25,
+            10
+          ],
+          [
+            26,
+            10
+          ],
+          [
+            27,
+            10
+          ],
+          [
+            28,
+            10
+          ],
+          [
+            29,
+            10
+          ]
+        ],
+        "starting_traces": [
+          [
+            12,
+            10
+          ],
+          [
+            13,
+            10
+          ],
+          [
+            14,
+            10
+          ],
+          [
+            15,
+            10
+          ]
+        ]
+      }
+    },
+    "connections": [
+      {
+        "cell": [
+          15,
+          4
+        ],
+        "layers": [
+          1,
+          2,
+          3
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          15,
+          8
+        ],
+        "layers": [
+          1,
+          2
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          15,
+          12
+        ],
+        "layers": [
+          1,
+          2,
+          3
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          15,
+          16
+        ],
+        "layers": [
+          1,
+          2
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          30,
+          10
+        ],
+        "layers": [
+          2,
+          3
+        ],
+        "material": "copper"
+      }
+    ]
+  },
+  "lithography": {
+    "fields": [
+      {
+        "name": "SIMD LANE FIELD 0",
+        "origin": [
+          0,
+          0
+        ],
+        "size": [
+          8,
+          4
+        ],
+        "layer": 1,
+        "pattern": "grid",
+        "pitch": 2,
+        "tint": "#69d7e6",
+        "bus_taps": [
+          [
+            3,
+            4
+          ]
+        ]
+      },
+      {
+        "name": "SIMD LANE FIELD 1",
+        "origin": [
+          9,
+          0
+        ],
+        "size": [
+          8,
+          4
+        ],
+        "layer": 1,
+        "pattern": "crosshatch",
+        "pitch": 2,
+        "tint": "#c88bff",
+        "bus_taps": [
+          [
+            12,
+            4
+          ]
+        ]
+      },
+      {
+        "name": "SIMD LANE FIELD 2",
+        "origin": [
+          0,
+          13
+        ],
+        "size": [
+          8,
+          4
+        ],
+        "layer": 1,
+        "pattern": "checker",
+        "pitch": 2,
+        "tint": "#72f0ad",
+        "bus_taps": [
+          [
+            3,
+            12
+          ]
+        ]
+      },
+      {
+        "name": "SIMD LANE FIELD 3",
+        "origin": [
+          9,
+          13
+        ],
+        "size": [
+          8,
+          4
+        ],
+        "layer": 1,
+        "pattern": "grid",
+        "pitch": 2,
+        "tint": "#ff9c67",
+        "bus_taps": [
+          [
+            12,
+            12
+          ]
+        ]
+      },
+      {
+        "name": "REDUCTION CROSSBAR",
+        "origin": [
+          18,
+          5
+        ],
+        "size": [
+          13,
+          10
+        ],
+        "layer": 3,
+        "pattern": "crosshatch",
+        "pitch": 3,
+        "tint": "#ffe76b",
+        "bus_taps": [
+          [
+            20,
+            10
+          ],
+          [
+            27,
+            10
+          ]
+        ]
+      }
+    ]
+  },
+  "equations": [
+    {
+      "name": "SIMD LANE",
+      "expression": "yᵢ = f(xᵢ)  for  i ∈ {0,1,2,3}"
+    },
+    {
+      "name": "REDUCTION",
+      "expression": "Y = Σᵢ yᵢ / 4"
+    },
+    {
+      "name": "SPEEDUP",
+      "expression": "Tparallel ≈ Tserial / 4 + Tlink"
+    },
+    {
+      "name": "CROSSBAR",
+      "expression": "Bshared = mean(BFAB-A, BFAB-B)"
+    }
+  ],
+  "output": {
+    "screen_name": "PARALLEL OUTPUT // SIMD RESULT LIVE",
+    "idle_message": "parallel lanes streaming"
+  },
+  "infinite_supply": true,
+  "boot_working": true,
+  "cluster": {
+    "enabled": true,
+    "shared_memory": true,
+    "link": {
+      "type": "firewire",
+      "name": "PARA-FIRELINK-A/B",
+      "latency_ticks": 1,
+      "bandwidth": "crossbar-shared"
+    },
+    "computers": [
+      {
+        "name": "PARA-SERVER-A",
+        "role": "lane-source",
+        "cores": 2
+      },
+      {
+        "name": "PARA-SERVER-B",
+        "role": "lane-reduction",
+        "cores": 2
+      }
+    ]
+  },
+  "program": {
+    "language": "LITHO-ISA",
+    "auto_start": true,
+    "speed": 48,
+    "source": "; PARAFAB SIMD program: every core owns a lane index.\n; The same code executes in parallel, then values cross the shared link.\nCONST R1 0.12\nLOOP:\nLANE R0\nMUL R2 R0 R1\nADD R2 R2 0.20\nNOISE R3 0.04 R2\nINPUT R4\nMUL R4 R4 0.25\nADD R5 R3 R4\nCLAMP R5 0 1\nSEND R5\nPRINT \"LANE\" R0 \"OUT\" R5\nWAIT 2\nJMP LOOP\n"
+  },
+  "chips": [
+    {
+      "name": "SIMD LANE 0",
+      "code": "P-01",
+      "anchor": [
+        1,
+        1
+      ],
+      "pattern": {
+        "0,0": "silicon",
+        "1,0": "signal",
+        "2,0": "electron",
+        "0,1": "copper",
+        "1,1": "quantum",
+        "2,1": "photon",
+        "0,2": "dielectric",
+        "1,2": "via",
+        "2,2": "clock"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 2,
+        "south": 1,
+        "west": 1
+      },
+      "gate_target": 6,
+      "tint": "#69d7e6",
+      "output": "lane zero vector emitted",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "source"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "and"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "hadamard"
+        }
+      ],
+      "connected_ports": [
+        [
+          "east",
+          0
+        ],
+        [
+          "south",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "SIMD LANE 1",
+      "code": "P-02",
+      "anchor": [
+        10,
+        1
+      ],
+      "pattern": {
+        "0,0": "silicon",
+        "1,0": "signal",
+        "2,0": "electron",
+        "0,1": "copper",
+        "1,1": "quantum",
+        "2,1": "photon",
+        "0,2": "dielectric",
+        "1,2": "via",
+        "2,2": "clock"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 2,
+        "south": 1,
+        "west": 2
+      },
+      "gate_target": 6,
+      "tint": "#c88bff",
+      "output": "lane one vector emitted",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "source"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "or"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "phase"
+        }
+      ],
+      "connected_ports": [
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "SIMD LANE 2",
+      "code": "P-03",
+      "anchor": [
+        1,
+        13
+      ],
+      "pattern": {
+        "0,0": "silicon",
+        "1,0": "signal",
+        "2,0": "electron",
+        "0,1": "copper",
+        "1,1": "quantum",
+        "2,1": "photon",
+        "0,2": "dielectric",
+        "1,2": "via",
+        "2,2": "clock"
+      },
+      "face_slots": {
+        "north": 1,
+        "east": 3,
+        "south": 1,
+        "west": 1
+      },
+      "gate_target": 6,
+      "tint": "#72f0ad",
+      "output": "lane two vector emitted",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "source"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "not"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "t_gate"
+        }
+      ],
+      "connected_ports": [
+        [
+          "east",
+          0
+        ],
+        [
+          "east",
+          1
+        ]
+      ]
+    },
+    {
+      "name": "SIMD LANE 3",
+      "code": "P-04",
+      "anchor": [
+        10,
+        13
+      ],
+      "pattern": {
+        "0,0": "silicon",
+        "1,0": "signal",
+        "2,0": "electron",
+        "0,1": "copper",
+        "1,1": "quantum",
+        "2,1": "photon",
+        "0,2": "dielectric",
+        "1,2": "via",
+        "2,2": "clock"
+      },
+      "face_slots": {
+        "north": 1,
+        "east": 2,
+        "south": 2,
+        "west": 1
+      },
+      "gate_target": 6,
+      "tint": "#ff9c67",
+      "output": "lane three vector emitted",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "source"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "cnot"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "measure"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "PARALLEL REDUCTION",
+      "code": "P-05",
+      "anchor": [
+        19,
+        6
+      ],
+      "pattern": {
+        "0,0": "observer",
+        "1,0": "bayes",
+        "2,0": "consensus",
+        "0,1": "signal",
+        "1,1": "quantum",
+        "2,1": "signal",
+        "0,2": "copper",
+        "1,2": "via",
+        "2,2": "copper"
+      },
+      "face_slots": {
+        "north": 3,
+        "east": 2,
+        "south": 2,
+        "west": 3
+      },
+      "gate_target": 8,
+      "tint": "#ffe76b",
+      "output": "lane reduction synchronized",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "and"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "parity"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "weak_measure"
+        },
+        {
+          "slot": [
+            4,
+            1
+          ],
+          "gate": "bell"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "north",
+          1
+        ],
+        [
+          "west",
+          0
+        ],
+        [
+          "east",
+          0
+        ]
+      ]
+    },
+    {
+      "name": "PARALLEL SCREEN OUTPUT",
+      "code": "P-06",
+      "anchor": [
+        27,
+        6
+      ],
+      "pattern": {
+        "0,0": "photon",
+        "1,0": "polariton",
+        "2,0": "plasmon",
+        "0,1": "signal",
+        "1,1": "quantum",
+        "2,1": "gold",
+        "0,2": "clock",
+        "1,2": "via",
+        "2,2": "signal"
+      },
+      "face_slots": {
+        "north": 2,
+        "east": 3,
+        "south": 1,
+        "west": 2
+      },
+      "gate_target": 7,
+      "tint": "#f2a1ff",
+      "output": "parallel result rendered to screen",
+      "initial_gates": [
+        {
+          "slot": [
+            1,
+            1
+          ],
+          "gate": "measure"
+        },
+        {
+          "slot": [
+            2,
+            1
+          ],
+          "gate": "qft"
+        },
+        {
+          "slot": [
+            3,
+            1
+          ],
+          "gate": "teleport"
+        }
+      ],
+      "connected_ports": [
+        [
+          "north",
+          0
+        ],
+        [
+          "east",
+          0
+        ],
+        [
+          "west",
+          0
+        ]
+      ]
+    }
+  ]
+}
