@@ -99,9 +99,11 @@ The material palette also includes quantum quasiparticles such as **phonon**, ma
 
 Directional blocks now show restrained route arrows. Press `R` to rotate the placement direction through east, south, west, and north. Active conductive/quantum blocks pulse and glow with the live bus; inactive blocks remain dim with a static direction marker. The live packet is the primary notifier: its arrowhead follows the current bus segment and updates direction on every hop, including corners and diagonal transitions. Presets stamp every block with the selected orientation, and saved JSON preserves those directions. JSON now writes readable voxel records with `direction` plus numeric `rotation` degrees (`0=east`, `90=south`, `180=west`, `270=north`); legacy five-item voxel arrays and direction strings still load. Chip `initial_gates` and saved `chip_logic.gates` accept the same `direction`/`rotation` fields, and gate arrows are visible in chip scale.
 
-## Dual-computer server mode
+## Dual-computer lithography mode
 
-The built-in, neural, and quantum systems run as a four-lane shared program cluster: `FAB-A` / `Q-SERVER-A` has two cores and `FAB-B` / `Q-SERVER-B` has two cores. Every lane receives the same compiled LITHO-ISA source but owns separate registers and a program counter. The two computers exchange their averaged `SEND` value over a simulated FireWire-style `FIRELINK` with configurable tick latency; `INPUT` reads the value delivered by that link.
+The dual-computer examples are two fabricated virtual servers, not a software-only socket demo. Each server owns an explicit `chip_codes` bank, and the program is synthesized separately against that bank. A missing gate on either fabricated bank blocks execution with `SYNTH WAIT`. Each server has two cores, so the shared program runs across four lanes with separate registers and program counters.
+
+The servers communicate through a physical in-game FireWire lithography route. The route is stored on layer 2 as conductive voxel cells; the synthesized gate carrier travels over that route and `INPUT` reads the delivered carrier. Removing one route voxel immediately changes the machine to `FAB WAIT`.
 
 A JSON system enables it with:
 
@@ -109,15 +111,21 @@ A JSON system enables it with:
 "cluster": {
   "enabled": true,
   "shared_memory": true,
-  "link": {"type": "firewire", "name": "FIRELINK-A/B", "latency_ticks": 2},
+  "link": {
+    "type": "firewire",
+    "name": "FIRELINK-A/B",
+    "layer": 2,
+    "latency_ticks": 2,
+    "cells": [[0, 6], [1, 6], [2, 6]]
+  },
   "computers": [
-    {"name": "FAB-A", "role": "primary", "cores": 2},
-    {"name": "FAB-B", "role": "replica", "cores": 2}
+    {"name": "FAB-A", "role": "primary", "cores": 2, "chip_codes": ["N-01", "N-03"]},
+    {"name": "FAB-B", "role": "replica", "cores": 2, "chip_codes": ["N-02", "N-04"]}
   ]
 }
 ```
 
-The live program strip reports `DUAL-SERVER`, active core count, link type, latency, and transfer count. This is a deterministic simulator model of a high-speed interconnect, not an attempt to access real FireWire hardware.
+The live program strip reports the active fabricated server/chip, carrier values, FireWire hop, direction, latency, and transfer count. This remains an in-game lithography architecture; it does not access physical FireWire hardware on the host computer.
 
 ## Equation proposals
 
@@ -126,6 +134,10 @@ Open **File → Propose Equation to Chip…** or press `Ctrl+E`. Choose a chip, 
 ## Programming the computer
 
 Open **File → Edit / Run LITHO-ISA Program…** or press `Ctrl+P`. The editor accepts source directly, with `RUN`, `STEP`, `STOP`, `RESET`, `.litho` load/save, and an **instructions/frame** speed control. The runtime executes many instructions per rendered frame, so increasing speed accelerates the computer without multiplying canvas redraw work.
+
+Execution is physically gated by the fabricated board. The compiler then synthesizes each instruction into a gate-stage netlist. Arithmetic and control instructions lower into AND/OR/NOT stages; quantum instructions require their matching fabricated particle gate, such as CPHASE → CONTROLLED PHASE or QFT → QFT. Each stage records its chip, gate slots, route latency, and carrier value in the live program status and saved JSON.
+
+The default and bundled computer examples boot with commissioned lithography. For a custom or unbuilt system, RUN and STEP remain in FAB WAIT until every chip's layer-one pattern is placed, its particle gates and bus ports are complete, each chip has been exposed with L, and every routed bus cell contains a conductor. Removing a required chip material, gate, port, or trace while the computer is running stops execution on the next tick. The program strip reports FAB READY or FAB WAIT, and active blocks/packet arrows only animate while the fabricated computer is executing.
 
 The core instruction set is: `CONST`, `MOV`, `ADD`, `SUB`, `MUL`, `DIV`, `CLAMP`, `INC`, `DEC`, `NOISE`, `OBSERVE`, `BAYES`, `HADAMARD`, `MEASURE`, `SEND`, `PRINT`, `WAIT`, `JMP`, `JNZ`, `JZ`, and `HALT`. The invented quantum operations are `CPHASE`, `SQRTSWAP`, `ISWAP`, `FREDKIN`, `PARITY`, `WEAKMEASURE`, `BRAID`, `MAGICSTATE`, `TELEPORT`, `DEPHASE`, and `QFT`. Lines beginning with `;` or `#` are comments. Registers are `R0` through `R15`.
 

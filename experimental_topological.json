@@ -749,15 +749,15 @@
   "equations": [
     {
       "name": "BRAID",
-      "expression": "UᵢUⱼUᵢ = UⱼUᵢUⱼ"
+      "expression": "U\u1d62U\u2c7cU\u1d62 = U\u2c7cU\u1d62U\u2c7c"
     },
     {
       "name": "PARITY",
-      "expression": "P = (-1)^(n₁+n₂)"
+      "expression": "P = (-1)^(n\u2081+n\u2082)"
     },
     {
       "name": "MAGIC STATE",
-      "expression": "|A⟩ = T|+⟩"
+      "expression": "|A\u27e9 = T|+\u27e9"
     }
   ],
   "output": {
@@ -773,18 +773,113 @@
       "type": "firewire",
       "name": "TOPO-FIRELINK",
       "latency_ticks": 1,
-      "bandwidth": "experimental-shared-bus"
+      "bandwidth": "fabricated-lithography-bus",
+      "layer": 2,
+      "cells": [
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          1
+        ],
+        [
+          14,
+          2
+        ],
+        [
+          14,
+          3
+        ],
+        [
+          14,
+          4
+        ],
+        [
+          14,
+          5
+        ],
+        [
+          14,
+          6
+        ],
+        [
+          14,
+          7
+        ],
+        [
+          14,
+          8
+        ],
+        [
+          14,
+          9
+        ],
+        [
+          14,
+          10
+        ],
+        [
+          14,
+          11
+        ],
+        [
+          14,
+          12
+        ],
+        [
+          14,
+          13
+        ],
+        [
+          14,
+          14
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          14,
+          16
+        ],
+        [
+          14,
+          17
+        ],
+        [
+          14,
+          18
+        ],
+        [
+          14,
+          19
+        ],
+        [
+          14,
+          20
+        ]
+      ]
     },
     "computers": [
       {
         "name": "TOPO-A",
         "role": "experiment-source",
-        "cores": 2
+        "cores": 2,
+        "chip_codes": [
+          "T-01",
+          "T-03"
+        ]
       },
       {
         "name": "TOPO-B",
         "role": "experiment-readout",
-        "cores": 2
+        "cores": 2,
+        "chip_codes": [
+          "T-02",
+          "T-04"
+        ]
       }
     ]
   },
@@ -1038,6 +1133,22 @@
             1
           ],
           "gate": "qft"
+        },
+        {
+          "slot": [
+            0,
+            0
+          ],
+          "gate": "parity",
+          "direction": "east"
+        },
+        {
+          "slot": [
+            1,
+            0
+          ],
+          "gate": "weak_measure",
+          "direction": "east"
         }
       ],
       "connected_ports": [

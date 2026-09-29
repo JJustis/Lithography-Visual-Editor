@@ -451,35 +451,35 @@
   "equations": [
     {
       "name": "QUBIT STATE",
-      "expression": "|ψ⟩ = α|0⟩ + β|1⟩"
+      "expression": "|\u03c8\u27e9 = \u03b1|0\u27e9 + \u03b2|1\u27e9"
     },
     {
       "name": "NORMALIZATION",
-      "expression": "|α|² + |β|² = 1"
+      "expression": "|\u03b1|\u00b2 + |\u03b2|\u00b2 = 1"
     },
     {
       "name": "BORN RULE",
-      "expression": "P(0)=|α|²,  P(1)=|β|²"
+      "expression": "P(0)=|\u03b1|\u00b2,  P(1)=|\u03b2|\u00b2"
     },
     {
       "name": "HADAMARD",
-      "expression": "H|0⟩ = (|0⟩ + |1⟩)/√2"
+      "expression": "H|0\u27e9 = (|0\u27e9 + |1\u27e9)/\u221a2"
     },
     {
       "name": "ENTANGLEMENT",
-      "expression": "CNOT(H|0⟩ ⊗ |0⟩) = (|00⟩ + |11⟩)/√2"
+      "expression": "CNOT(H|0\u27e9 \u2297 |0\u27e9) = (|00\u27e9 + |11\u27e9)/\u221a2"
     },
     {
       "name": "CONTROLLED PHASE",
-      "expression": "|11⟩ → e^(iφ)|11⟩"
+      "expression": "|11\u27e9 \u2192 e^(i\u03c6)|11\u27e9"
     },
     {
       "name": "ANYON BRAID",
-      "expression": "UᵢUⱼUᵢ = UⱼUᵢUⱼ"
+      "expression": "U\u1d62U\u2c7cU\u1d62 = U\u2c7cU\u1d62U\u2c7c"
     },
     {
       "name": "TELEPORT",
-      "expression": "|ψ⟩₃ = XᵐZⁿ|ψ⟩"
+      "expression": "|\u03c8\u27e9\u2083 = X\u1d50Z\u207f|\u03c8\u27e9"
     }
   ],
   "output": {
@@ -705,6 +705,22 @@
             1
           ],
           "gate": "magic_state"
+        },
+        {
+          "slot": [
+            0,
+            0
+          ],
+          "gate": "controlled_phase",
+          "direction": "east"
+        },
+        {
+          "slot": [
+            1,
+            0
+          ],
+          "gate": "weak_measure",
+          "direction": "east"
         }
       ],
       "connected_ports": [
@@ -822,18 +838,73 @@
       "type": "firewire",
       "name": "Q-FIRELINK-A/B",
       "latency_ticks": 2,
-      "bandwidth": "shared-bus"
+      "bandwidth": "fabricated-lithography-bus",
+      "layer": 2,
+      "cells": [
+        [
+          6,
+          0
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          6,
+          2
+        ],
+        [
+          6,
+          3
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          6,
+          6
+        ],
+        [
+          6,
+          7
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          6,
+          9
+        ],
+        [
+          6,
+          10
+        ]
+      ]
     },
     "computers": [
       {
         "name": "Q-SERVER-A",
         "role": "primary",
-        "cores": 2
+        "cores": 2,
+        "chip_codes": [
+          "Q-01",
+          "Q-03"
+        ]
       },
       {
         "name": "Q-SERVER-B",
         "role": "replica",
-        "cores": 2
+        "cores": 2,
+        "chip_codes": [
+          "Q-02",
+          "Q-04"
+        ]
       }
     ]
   }

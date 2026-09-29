@@ -970,15 +970,15 @@
   "equations": [
     {
       "name": "SIMD LANE",
-      "expression": "yᵢ = f(xᵢ)  for  i ∈ {0,1,2,3}"
+      "expression": "y\u1d62 = f(x\u1d62)  for  i \u2208 {0,1,2,3}"
     },
     {
       "name": "REDUCTION",
-      "expression": "Y = Σᵢ yᵢ / 4"
+      "expression": "Y = \u03a3\u1d62 y\u1d62 / 4"
     },
     {
       "name": "SPEEDUP",
-      "expression": "Tparallel ≈ Tserial / 4 + Tlink"
+      "expression": "Tparallel \u2248 Tserial / 4 + Tlink"
     },
     {
       "name": "CROSSBAR",
@@ -998,7 +998,98 @@
       "type": "firewire",
       "name": "PARA-FIRELINK-A/B",
       "latency_ticks": 1,
-      "bandwidth": "crossbar-shared"
+      "bandwidth": "crossbar-shared",
+      "layer": 2,
+      "cells": [
+        [
+          15,
+          0
+        ],
+        [
+          15,
+          1
+        ],
+        [
+          15,
+          2
+        ],
+        [
+          15,
+          3
+        ],
+        [
+          15,
+          4
+        ],
+        [
+          15,
+          5
+        ],
+        [
+          15,
+          6
+        ],
+        [
+          15,
+          7
+        ],
+        [
+          15,
+          8
+        ],
+        [
+          15,
+          9
+        ],
+        [
+          15,
+          10
+        ],
+        [
+          15,
+          11
+        ],
+        [
+          15,
+          12
+        ],
+        [
+          15,
+          13
+        ],
+        [
+          15,
+          14
+        ],
+        [
+          15,
+          15
+        ],
+        [
+          15,
+          16
+        ],
+        [
+          15,
+          17
+        ],
+        [
+          15,
+          18
+        ],
+        [
+          15,
+          19
+        ],
+        [
+          15,
+          20
+        ],
+        [
+          15,
+          21
+        ]
+      ]
     },
     "computers": [
       {

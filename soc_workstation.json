@@ -5,382 +5,1086 @@
     "clock_ghz": 3.6
   },
   "board": {
-    "width": 32,
-    "height": 20
+    "width": 44,
+    "height": 26
   },
   "bus": {
     "layers": {
       "1": {
         "path": [
           [
+            -12,
+            7
+          ],
+          [
+            -11,
+            7
+          ],
+          [
+            -10,
+            7
+          ],
+          [
+            -9,
+            7
+          ],
+          [
             -8,
-            6
+            7
           ],
           [
             -7,
-            6
+            7
           ],
           [
             -6,
-            6
+            7
           ],
           [
             -5,
-            6
+            7
           ],
           [
             -4,
-            6
+            7
           ],
           [
             -3,
-            6
+            7
           ],
           [
             -2,
-            6
+            7
           ],
           [
             -1,
-            6
+            7
           ],
           [
             0,
-            6
+            7
           ],
           [
             1,
-            6
+            7
           ],
           [
             2,
-            6
+            7
           ],
           [
             3,
-            6
+            7
           ],
           [
             4,
-            6
-          ],
-          [
-            5,
-            6
-          ],
-          [
-            6,
-            6
-          ],
-          [
-            7,
-            6
-          ],
-          [
-            8,
-            6
-          ],
-          [
-            9,
-            6
-          ],
-          [
-            10,
-            6
-          ],
-          [
-            11,
-            6
-          ],
-          [
-            12,
-            6
-          ],
-          [
-            13,
-            6
-          ],
-          [
-            14,
-            6
-          ],
-          [
-            15,
-            6
-          ],
-          [
-            16,
-            6
-          ],
-          [
-            17,
-            6
-          ],
-          [
-            18,
-            6
-          ],
-          [
-            19,
-            6
-          ],
-          [
-            20,
-            6
-          ],
-          [
-            21,
-            6
-          ],
-          [
-            22,
-            6
-          ],
-          [
-            23,
-            6
-          ],
-          [
-            24,
-            6
-          ],
-          [
-            25,
-            6
-          ],
-          [
-            26,
-            6
+            7
           ],
           [
             5,
             7
           ],
           [
-            5,
+            6,
+            7
+          ],
+          [
+            7,
+            7
+          ],
+          [
+            8,
+            7
+          ],
+          [
+            9,
+            7
+          ],
+          [
+            10,
+            7
+          ],
+          [
+            11,
+            7
+          ],
+          [
+            12,
+            7
+          ],
+          [
+            13,
+            7
+          ],
+          [
+            14,
+            7
+          ],
+          [
+            15,
+            7
+          ],
+          [
+            16,
+            7
+          ],
+          [
+            17,
+            7
+          ],
+          [
+            18,
+            7
+          ],
+          [
+            19,
+            7
+          ],
+          [
+            20,
+            7
+          ],
+          [
+            21,
+            7
+          ],
+          [
+            22,
+            7
+          ],
+          [
+            23,
+            7
+          ],
+          [
+            24,
+            7
+          ],
+          [
+            25,
+            7
+          ],
+          [
+            26,
+            7
+          ],
+          [
+            27,
+            7
+          ],
+          [
+            28,
+            7
+          ],
+          [
+            29,
+            7
+          ],
+          [
+            30,
+            7
+          ],
+          [
+            31,
+            7
+          ],
+          [
+            32,
+            7
+          ],
+          [
+            33,
+            7
+          ],
+          [
+            34,
+            7
+          ],
+          [
+            35,
+            7
+          ],
+          [
+            36,
+            7
+          ],
+          [
+            37,
+            7
+          ],
+          [
+            38,
+            7
+          ],
+          [
+            38,
             8
           ],
           [
-            5,
+            38,
             9
           ],
           [
-            5,
+            38,
             10
           ],
           [
-            5,
+            38,
             11
+          ],
+          [
+            38,
+            12
+          ],
+          [
+            38,
+            13
+          ],
+          [
+            38,
+            14
+          ],
+          [
+            38,
+            15
+          ],
+          [
+            38,
+            16
+          ],
+          [
+            38,
+            17
+          ],
+          [
+            38,
+            18
+          ],
+          [
+            38,
+            19
+          ],
+          [
+            38,
+            20
+          ],
+          [
+            38,
+            21
+          ],
+          [
+            37,
+            21
+          ],
+          [
+            36,
+            21
+          ],
+          [
+            35,
+            21
+          ],
+          [
+            34,
+            21
+          ],
+          [
+            33,
+            21
+          ],
+          [
+            32,
+            21
+          ],
+          [
+            31,
+            21
+          ],
+          [
+            30,
+            21
+          ],
+          [
+            29,
+            21
+          ],
+          [
+            28,
+            21
+          ],
+          [
+            27,
+            21
+          ],
+          [
+            26,
+            21
+          ],
+          [
+            25,
+            21
+          ],
+          [
+            24,
+            21
+          ],
+          [
+            23,
+            21
+          ],
+          [
+            22,
+            21
+          ],
+          [
+            21,
+            21
+          ],
+          [
+            20,
+            21
+          ],
+          [
+            19,
+            21
+          ],
+          [
+            18,
+            21
+          ],
+          [
+            17,
+            21
+          ],
+          [
+            16,
+            21
+          ],
+          [
+            15,
+            21
+          ],
+          [
+            14,
+            21
+          ],
+          [
+            13,
+            21
+          ],
+          [
+            12,
+            21
+          ],
+          [
+            11,
+            21
+          ],
+          [
+            10,
+            21
+          ],
+          [
+            9,
+            21
+          ],
+          [
+            8,
+            21
+          ],
+          [
+            7,
+            21
+          ],
+          [
+            6,
+            21
+          ],
+          [
+            5,
+            21
+          ],
+          [
+            4,
+            21
+          ],
+          [
+            3,
+            21
+          ],
+          [
+            2,
+            21
+          ],
+          [
+            1,
+            21
+          ],
+          [
+            0,
+            21
+          ],
+          [
+            -1,
+            21
+          ],
+          [
+            -2,
+            21
+          ],
+          [
+            -3,
+            21
+          ],
+          [
+            -4,
+            21
           ]
         ],
         "starting_traces": [
           [
-            -8,
-            6
-          ],
-          [
-            -7,
-            6
-          ],
-          [
-            -6,
-            6
-          ],
-          [
-            -5,
-            6
-          ],
-          [
             -4,
-            6
+            7
           ],
           [
-            -3,
-            6
-          ],
-          [
-            -2,
-            6
-          ],
-          [
-            -1,
-            6
-          ],
-          [
-            0,
-            6
-          ],
-          [
-            1,
-            6
-          ],
-          [
-            2,
-            6
+            16,
+            7
           ]
         ]
       },
       "2": {
         "path": [
           [
-            5,
-            1
-          ],
-          [
-            5,
-            2
-          ],
-          [
-            5,
+            -6,
             3
           ],
           [
-            5,
+            -6,
             4
           ],
           [
-            5,
+            -6,
             5
           ],
           [
-            5,
+            -6,
             6
           ],
           [
-            5,
+            -6,
             7
           ],
           [
-            5,
+            -6,
             8
           ],
           [
-            5,
+            -6,
             9
           ],
           [
-            5,
+            -6,
             10
           ],
           [
-            5,
+            -6,
             11
           ],
           [
-            5,
+            -6,
             12
+          ],
+          [
+            -6,
+            13
+          ],
+          [
+            -6,
+            14
+          ],
+          [
+            -6,
+            15
+          ],
+          [
+            -6,
+            16
+          ],
+          [
+            -6,
+            17
+          ],
+          [
+            -6,
+            18
+          ],
+          [
+            -6,
+            19
+          ],
+          [
+            -6,
+            20
+          ],
+          [
+            -6,
+            21
+          ],
+          [
+            -6,
+            22
+          ],
+          [
+            -6,
+            23
+          ],
+          [
+            -5,
+            23
+          ],
+          [
+            -4,
+            23
+          ],
+          [
+            -3,
+            23
+          ],
+          [
+            -2,
+            23
+          ],
+          [
+            -1,
+            23
+          ],
+          [
+            0,
+            23
+          ],
+          [
+            1,
+            23
+          ],
+          [
+            2,
+            23
+          ],
+          [
+            3,
+            23
+          ],
+          [
+            4,
+            23
+          ],
+          [
+            5,
+            23
+          ],
+          [
+            6,
+            23
+          ],
+          [
+            7,
+            23
+          ],
+          [
+            8,
+            23
+          ],
+          [
+            9,
+            23
+          ],
+          [
+            10,
+            23
+          ],
+          [
+            11,
+            23
+          ],
+          [
+            12,
+            23
+          ],
+          [
+            13,
+            23
+          ],
+          [
+            14,
+            23
+          ],
+          [
+            15,
+            23
+          ],
+          [
+            16,
+            23
+          ],
+          [
+            17,
+            23
+          ],
+          [
+            18,
+            23
+          ],
+          [
+            19,
+            23
+          ],
+          [
+            20,
+            23
+          ],
+          [
+            21,
+            23
+          ],
+          [
+            22,
+            23
+          ],
+          [
+            23,
+            23
+          ],
+          [
+            24,
+            23
+          ],
+          [
+            25,
+            23
+          ],
+          [
+            26,
+            23
+          ],
+          [
+            27,
+            23
+          ],
+          [
+            28,
+            23
+          ],
+          [
+            29,
+            23
+          ],
+          [
+            30,
+            23
+          ],
+          [
+            31,
+            23
+          ],
+          [
+            32,
+            23
+          ],
+          [
+            32,
+            22
+          ],
+          [
+            32,
+            21
+          ],
+          [
+            32,
+            20
+          ],
+          [
+            32,
+            19
+          ],
+          [
+            32,
+            18
+          ],
+          [
+            32,
+            17
+          ],
+          [
+            32,
+            16
+          ],
+          [
+            32,
+            15
+          ],
+          [
+            32,
+            14
+          ],
+          [
+            32,
+            13
+          ],
+          [
+            32,
+            12
+          ],
+          [
+            32,
+            11
+          ],
+          [
+            32,
+            10
+          ],
+          [
+            32,
+            9
+          ],
+          [
+            32,
+            8
+          ],
+          [
+            32,
+            7
+          ],
+          [
+            32,
+            6
+          ],
+          [
+            32,
+            5
           ]
         ],
         "starting_traces": [
           [
-            5,
-            4
+            -6,
+            12
           ],
           [
-            5,
-            5
-          ],
-          [
-            5,
-            6
-          ],
-          [
-            5,
-            7
+            20,
+            23
           ]
         ]
       },
       "3": {
         "path": [
           [
-            -2,
-            13
-          ],
-          [
-            -1,
-            13
-          ],
-          [
-            0,
-            13
-          ],
-          [
-            1,
-            13
-          ],
-          [
             2,
-            13
+            2
           ],
           [
             3,
-            13
+            2
           ],
           [
             4,
-            13
+            2
           ],
           [
             5,
-            13
+            2
           ],
           [
             6,
-            13
+            2
           ],
           [
             7,
-            13
+            2
           ],
           [
             8,
-            13
+            2
           ],
           [
             9,
-            13
+            2
           ],
           [
             10,
-            13
+            2
           ],
           [
             11,
-            13
+            2
           ],
           [
             12,
-            13
+            2
           ],
           [
             13,
-            13
+            2
           ],
           [
             14,
-            13
+            2
           ],
           [
             15,
+            2
+          ],
+          [
+            16,
+            2
+          ],
+          [
+            17,
+            2
+          ],
+          [
+            18,
+            2
+          ],
+          [
+            19,
+            2
+          ],
+          [
+            20,
+            2
+          ],
+          [
+            21,
+            2
+          ],
+          [
+            22,
+            2
+          ],
+          [
+            23,
+            2
+          ],
+          [
+            24,
+            2
+          ],
+          [
+            25,
+            2
+          ],
+          [
+            26,
+            2
+          ],
+          [
+            27,
+            2
+          ],
+          [
+            28,
+            2
+          ],
+          [
+            29,
+            2
+          ],
+          [
+            30,
+            2
+          ],
+          [
+            31,
+            2
+          ],
+          [
+            32,
+            2
+          ],
+          [
+            33,
+            2
+          ],
+          [
+            34,
+            2
+          ],
+          [
+            34,
+            3
+          ],
+          [
+            34,
+            4
+          ],
+          [
+            34,
+            5
+          ],
+          [
+            34,
+            6
+          ],
+          [
+            34,
+            7
+          ],
+          [
+            34,
+            8
+          ],
+          [
+            34,
+            9
+          ],
+          [
+            34,
+            10
+          ],
+          [
+            34,
+            11
+          ],
+          [
+            34,
+            12
+          ],
+          [
+            34,
             13
+          ],
+          [
+            34,
+            14
+          ],
+          [
+            34,
+            15
+          ],
+          [
+            34,
+            16
+          ],
+          [
+            34,
+            17
+          ],
+          [
+            34,
+            18
+          ],
+          [
+            33,
+            18
+          ],
+          [
+            32,
+            18
+          ],
+          [
+            31,
+            18
+          ],
+          [
+            30,
+            18
+          ],
+          [
+            29,
+            18
+          ],
+          [
+            28,
+            18
+          ],
+          [
+            27,
+            18
+          ],
+          [
+            26,
+            18
+          ],
+          [
+            25,
+            18
+          ],
+          [
+            24,
+            18
+          ],
+          [
+            23,
+            18
+          ],
+          [
+            22,
+            18
+          ],
+          [
+            21,
+            18
+          ],
+          [
+            20,
+            18
+          ],
+          [
+            19,
+            18
+          ],
+          [
+            18,
+            18
+          ],
+          [
+            17,
+            18
+          ],
+          [
+            16,
+            18
+          ],
+          [
+            15,
+            18
+          ],
+          [
+            14,
+            18
+          ],
+          [
+            14,
+            19
+          ],
+          [
+            14,
+            20
+          ],
+          [
+            14,
+            21
+          ],
+          [
+            14,
+            22
+          ],
+          [
+            14,
+            23
+          ],
+          [
+            14,
+            24
           ]
         ],
         "starting_traces": [
           [
-            2,
-            13
+            10,
+            2
           ],
           [
-            3,
-            13
-          ],
-          [
-            4,
-            13
-          ],
-          [
-            5,
-            13
+            34,
+            10
           ]
         ]
       }
@@ -388,8 +1092,8 @@
     "connections": [
       {
         "cell": [
-          5,
-          6
+          6,
+          7
         ],
         "layers": [
           1,
@@ -400,138 +1104,137 @@
       },
       {
         "cell": [
-          12,
-          6
+          16,
+          7
         ],
         "layers": [
           1,
+          2,
           3
-        ],
-        "material": "copper"
-      },
-      {
-        "cell": [
-          5,
-          11
-        ],
-        "layers": [
-          1,
-          2
         ],
         "material": "via"
       },
       {
         "cell": [
-          9,
-          13
+          26,
+          7
         ],
         "layers": [
+          1,
           2,
           3
         ],
-        "material": "copper"
+        "material": "via"
+      },
+      {
+        "cell": [
+          38,
+          14
+        ],
+        "layers": [
+          1,
+          2,
+          3
+        ],
+        "material": "via"
+      },
+      {
+        "cell": [
+          14,
+          21
+        ],
+        "layers": [
+          1,
+          2,
+          3
+        ],
+        "material": "via"
       }
     ]
   },
   "lithography": {
     "fields": [
       {
-        "name": "SENSORY DENDRITE ARRAY",
+        "name": "SOC CONTROL PLANE",
         "origin": [
-          -8,
-          -3
+          1,
+          1
         ],
         "size": [
-          12,
-          8
+          14,
+          7
         ],
         "layer": 1,
         "pattern": "crosshatch",
         "pitch": 2,
-        "tint": "#55dce0",
+        "tint": "#63d9ff",
         "bus_taps": [
           [
-            0,
-            6
-          ],
-          [
-            3,
-            6
+            6,
+            7
           ]
         ]
       },
       {
-        "name": "SYNAPTIC WEIGHT MESH",
+        "name": "EQUATION VECTOR BAY",
         "origin": [
-          4,
-          -3
+          16,
+          1
         ],
         "size": [
-          13,
-          12
+          14,
+          7
         ],
         "layer": 2,
         "pattern": "grid",
-        "pitch": 1,
-        "tint": "#b98cff",
+        "pitch": 3,
+        "tint": "#d6a7ff",
         "bus_taps": [
           [
-            5,
-            6
-          ],
-          [
-            5,
-            9
+            16,
+            7
           ]
         ]
       },
       {
-        "name": "RECURRENT MEMORY FIELD",
+        "name": "512X512 FRAMEBUFFER",
         "origin": [
-          0,
-          9
+          10,
+          13
         ],
         "size": [
-          18,
+          24,
           8
         ],
         "layer": 3,
         "pattern": "checker",
         "pitch": 2,
-        "tint": "#ff6f91",
+        "tint": "#ffe76b",
         "bus_taps": [
           [
-            9,
-            13
-          ],
-          [
-            14,
-            13
+            26,
+            21
           ]
         ]
       },
       {
-        "name": "BAYESIAN OBSERVATION FIELD",
+        "name": "MEMORY CROSSBAR",
         "origin": [
-          17,
-          -3
+          31,
+          3
         ],
         "size": [
-          12,
-          9
+          9,
+          7
         ],
         "layer": 1,
-        "pattern": "crosshatch",
-        "pitch": 1,
-        "tint": "#ff5f91",
+        "pattern": "grid",
+        "pitch": 2,
+        "tint": "#6ceda5",
         "bus_taps": [
           [
-            19,
-            6
-          ],
-          [
-            24,
-            6
+            38,
+            14
           ]
         ]
       }
@@ -545,450 +1248,528 @@
   "boot_working": true,
   "chips": [
     {
-      "name": "SENSORY CORTEX",
-      "code": "N-01",
+      "name": "SOC CONTROL FABRIC",
+      "code": "S-01",
       "anchor": [
-        -2,
-        1
+        2,
+        2
       ],
       "pattern": {
         "0,0": "silicon",
-        "1,0": "transistor",
-        "2,0": "n_type",
-        "0,1": "signal",
-        "1,1": "electron",
-        "2,1": "copper",
-        "0,2": "p_type",
-        "1,2": "hole",
-        "2,2": "silicon"
+        "1,0": "copper",
+        "2,0": "silicon",
+        "3,0": "copper",
+        "0,1": "transistor",
+        "1,1": "dielectric",
+        "2,1": "transistor",
+        "3,1": "dielectric",
+        "0,2": "copper",
+        "1,2": "silicon",
+        "2,2": "copper",
+        "3,2": "silicon"
       },
+      "tint": "#63d9ff",
+      "output": "control plane synchronized",
       "face_slots": {
         "north": 2,
         "east": 3,
         "south": 2,
         "west": 1
       },
-      "gate_target": 8,
-      "tint": "#55dce0",
-      "output": "sensory spike train acquired",
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "source"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "and"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "or"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "not"
-        }
-      ],
-      "connected_ports": [
-        [
-          "east",
-          0
-        ],
-        [
-          "south",
-          0
-        ]
-      ]
+      "gate_target": 7
     },
     {
-      "name": "SYNAPTIC CORE",
-      "code": "N-02",
+      "name": "VECTOR EQUATION CORE",
+      "code": "S-02",
       "anchor": [
-        5,
-        1
-      ],
-      "pattern": {
-        "0,0": "p_type",
-        "1,0": "transistor",
-        "2,0": "n_type",
-        "0,1": "electron",
-        "1,1": "quantum",
-        "2,1": "hole",
-        "0,2": "copper",
-        "1,2": "signal",
-        "2,2": "silicon"
-      },
-      "face_slots": {
-        "north": 2,
-        "east": 3,
-        "south": 2,
-        "west": 2
-      },
-      "gate_target": 9,
-      "tint": "#b98cff",
-      "output": "synaptic weights converged",
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "hadamard"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "cnot"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "phase"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "bell"
-        }
-      ],
-      "connected_ports": [
-        [
-          "north",
-          0
-        ],
-        [
-          "west",
-          0
-        ],
-        [
-          "east",
-          0
-        ]
-      ]
-    },
-    {
-      "name": "SPIKE THRESHOLD UNIT",
-      "code": "N-03",
-      "anchor": [
-        12,
-        1
-      ],
-      "pattern": {
-        "0,0": "n_type",
-        "1,0": "transistor",
-        "2,0": "p_type",
-        "0,1": "phonon",
-        "1,1": "quantum",
-        "2,1": "ion",
-        "0,2": "silicon",
-        "1,2": "signal",
-        "2,2": "copper"
-      },
-      "face_slots": {
-        "north": 2,
-        "east": 2,
-        "south": 2,
-        "west": 2
-      },
-      "gate_target": 8,
-      "tint": "#ffbf69",
-      "output": "threshold crossings classified",
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "source"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "and"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "or"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "measure"
-        }
-      ],
-      "connected_ports": [
-        [
-          "west",
-          0
-        ],
-        [
-          "south",
-          0
-        ]
-      ]
-    },
-    {
-      "name": "RECURRENT MEMORY",
-      "code": "N-04",
-      "anchor": [
-        1,
-        10
+        13,
+        2
       ],
       "pattern": {
         "0,0": "silicon",
-        "1,0": "cooper_pair",
-        "2,0": "silicon",
+        "1,0": "p_type",
+        "2,0": "n_type",
+        "3,0": "silicon",
         "0,1": "copper",
-        "1,1": "qubit",
-        "2,1": "copper",
-        "0,2": "p_type",
-        "1,2": "transistor",
-        "2,2": "n_type"
+        "1,1": "transistor",
+        "2,1": "transistor",
+        "3,1": "copper",
+        "0,2": "gold",
+        "1,2": "silicon",
+        "2,2": "gold",
+        "3,2": "silicon"
       },
+      "tint": "#d6a7ff",
+      "output": "EVAL pipeline ready",
       "face_slots": {
-        "north": 3,
+        "north": 2,
         "east": 2,
         "south": 2,
         "west": 2
       },
-      "gate_target": 10,
-      "tint": "#ff6f91",
-      "output": "recurrent state retained",
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "swap"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "phase"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "t_gate"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "measure"
-        }
-      ],
-      "connected_ports": [
-        [
-          "north",
-          0
-        ],
-        [
-          "east",
-          0
-        ],
-        [
-          "west",
-          0
-        ]
-      ]
+      "gate_target": 8
     },
     {
-      "name": "MOTOR OUTPUT",
-      "code": "N-05",
+      "name": "64K MEMORY BANK",
+      "code": "S-03",
       "anchor": [
-        11,
-        10
+        26,
+        2
       ],
       "pattern": {
-        "0,0": "photon",
-        "1,0": "polariton",
-        "2,0": "plasmon",
-        "0,1": "signal",
-        "1,1": "quantum",
-        "2,1": "signal",
-        "0,2": "gold",
-        "1,2": "electron",
-        "2,2": "gold"
+        "0,0": "silicon",
+        "1,0": "dielectric",
+        "2,0": "silicon",
+        "3,0": "dielectric",
+        "0,1": "copper",
+        "1,1": "mask",
+        "2,1": "mask",
+        "3,1": "copper",
+        "0,2": "silicon",
+        "1,2": "dielectric",
+        "2,2": "silicon",
+        "3,2": "gold"
       },
-      "face_slots": {
-        "north": 2,
-        "east": 3,
-        "south": 1,
-        "west": 2
-      },
-      "gate_target": 8,
-      "tint": "#7cf0c5",
-      "output": "motor command waveform emitted",
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "measure"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "hadamard"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "not"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "source"
-        }
-      ],
-      "connected_ports": [
-        [
-          "north",
-          0
-        ],
-        [
-          "west",
-          0
-        ],
-        [
-          "east",
-          0
-        ]
-      ]
-    },
-    {
-      "name": "BAYESIAN OBSERVATION ENGINE",
-      "code": "N-06",
-      "anchor": [
-        19,
-        1
-      ],
-      "pattern": {
-        "0,0": "noise_source",
-        "1,0": "observer",
-        "2,0": "bayes",
-        "3,0": "consensus",
-        "0,1": "electron",
-        "1,1": "quantum",
-        "2,1": "bayes",
-        "3,1": "signal",
-        "0,2": "phonon",
-        "1,2": "observer",
-        "2,2": "consensus",
-        "3,2": "transistor"
-      },
+      "tint": "#6ceda5",
+      "output": "wide address memory online",
       "face_slots": {
         "north": 2,
         "east": 3,
         "south": 2,
         "west": 2
       },
-      "gate_target": 10,
-      "tint": "#ff5f91",
-      "output": "maze_flask.py posterior belief and deep-observation stream stable",
-      "source_file": "maze_flask.py",
-      "source_components": [
-        "HierarchicalPathfinder3D.observe",
-        "HierarchicalPathfinder3D.upward_pass",
-        "HierarchicalPathfinder3D.downward_pass",
-        "HierarchicalPathfinder3D.deep_obs",
-        "HierarchicalPathfinder3D.plan_path"
+      "gate_target": 9
+    },
+    {
+      "name": "PARALLEL MATH ARRAY",
+      "code": "S-04",
+      "anchor": [
+        5,
+        14
       ],
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "source"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "and"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "hadamard"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "phase"
-        },
-        {
-          "slot": [
-            5,
-            1
-          ],
-          "gate": "measure"
-        }
+      "pattern": {
+        "0,0": "silicon",
+        "1,0": "copper",
+        "2,0": "silicon",
+        "0,1": "phonon",
+        "1,1": "quantum",
+        "2,1": "phonon",
+        "0,2": "copper",
+        "1,2": "silicon",
+        "2,2": "copper"
+      },
+      "tint": "#f6b85f",
+      "output": "vector lanes active",
+      "face_slots": {
+        "north": 2,
+        "east": 2,
+        "south": 1,
+        "west": 2
+      },
+      "gate_target": 7
+    },
+    {
+      "name": "FRAMEBUFFER CONTROLLER",
+      "code": "S-05",
+      "anchor": [
+        17,
+        14
       ],
-      "connected_ports": [
-        [
-          "north",
-          0
-        ],
-        [
-          "west",
-          0
-        ],
-        [
-          "east",
-          0
-        ]
-      ]
+      "pattern": {
+        "0,0": "copper",
+        "1,0": "gold",
+        "2,0": "copper",
+        "3,0": "gold",
+        "0,1": "photon",
+        "1,1": "transistor",
+        "2,1": "transistor",
+        "3,1": "photon",
+        "0,2": "copper",
+        "1,2": "silicon",
+        "2,2": "copper",
+        "3,2": "silicon"
+      },
+      "tint": "#ffe76b",
+      "output": "512x512 raster output",
+      "face_slots": {
+        "north": 2,
+        "east": 2,
+        "south": 2,
+        "west": 2
+      },
+      "gate_target": 8
+    },
+    {
+      "name": "SOC SCREEN OUTPUT",
+      "code": "S-06",
+      "anchor": [
+        30,
+        14
+      ],
+      "pattern": {
+        "0,0": "photon",
+        "1,0": "photon",
+        "2,0": "photon",
+        "0,1": "copper",
+        "1,1": "quantum",
+        "2,1": "copper",
+        "0,2": "gold",
+        "1,2": "silicon",
+        "2,2": "gold"
+      },
+      "tint": "#72e0a0",
+      "output": "graphics stream online",
+      "face_slots": {
+        "north": 1,
+        "east": 2,
+        "south": 2,
+        "west": 2
+      },
+      "gate_target": 6
     }
   ],
   "cluster": {
-    "enabled": false
+    "enabled": true,
+    "shared_memory": true,
+    "link": {
+      "type": "firewire",
+      "name": "SOC-FIRELINK-A/B",
+      "latency_ticks": 2,
+      "bandwidth": "fabricated-lithography-bus",
+      "layer": 2,
+      "cells": [
+        [
+          -6,
+          3
+        ],
+        [
+          -6,
+          4
+        ],
+        [
+          -6,
+          5
+        ],
+        [
+          -6,
+          6
+        ],
+        [
+          -6,
+          7
+        ],
+        [
+          -6,
+          8
+        ],
+        [
+          -6,
+          9
+        ],
+        [
+          -6,
+          10
+        ],
+        [
+          -6,
+          11
+        ],
+        [
+          -6,
+          12
+        ],
+        [
+          -6,
+          13
+        ],
+        [
+          -6,
+          14
+        ],
+        [
+          -6,
+          15
+        ],
+        [
+          -6,
+          16
+        ],
+        [
+          -6,
+          17
+        ],
+        [
+          -6,
+          18
+        ],
+        [
+          -6,
+          19
+        ],
+        [
+          -6,
+          20
+        ],
+        [
+          -6,
+          21
+        ],
+        [
+          -6,
+          22
+        ],
+        [
+          -6,
+          23
+        ],
+        [
+          -5,
+          23
+        ],
+        [
+          -4,
+          23
+        ],
+        [
+          -3,
+          23
+        ],
+        [
+          -2,
+          23
+        ],
+        [
+          -1,
+          23
+        ],
+        [
+          0,
+          23
+        ],
+        [
+          1,
+          23
+        ],
+        [
+          2,
+          23
+        ],
+        [
+          3,
+          23
+        ],
+        [
+          4,
+          23
+        ],
+        [
+          5,
+          23
+        ],
+        [
+          6,
+          23
+        ],
+        [
+          7,
+          23
+        ],
+        [
+          8,
+          23
+        ],
+        [
+          9,
+          23
+        ],
+        [
+          10,
+          23
+        ],
+        [
+          11,
+          23
+        ],
+        [
+          12,
+          23
+        ],
+        [
+          13,
+          23
+        ],
+        [
+          14,
+          23
+        ],
+        [
+          15,
+          23
+        ],
+        [
+          16,
+          23
+        ],
+        [
+          17,
+          23
+        ],
+        [
+          18,
+          23
+        ],
+        [
+          19,
+          23
+        ],
+        [
+          20,
+          23
+        ],
+        [
+          21,
+          23
+        ],
+        [
+          22,
+          23
+        ],
+        [
+          23,
+          23
+        ],
+        [
+          24,
+          23
+        ],
+        [
+          25,
+          23
+        ],
+        [
+          26,
+          23
+        ],
+        [
+          27,
+          23
+        ],
+        [
+          28,
+          23
+        ],
+        [
+          29,
+          23
+        ],
+        [
+          30,
+          23
+        ],
+        [
+          31,
+          23
+        ],
+        [
+          32,
+          23
+        ],
+        [
+          32,
+          22
+        ],
+        [
+          32,
+          21
+        ],
+        [
+          32,
+          20
+        ],
+        [
+          32,
+          19
+        ],
+        [
+          32,
+          18
+        ],
+        [
+          32,
+          17
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          32,
+          15
+        ],
+        [
+          32,
+          14
+        ],
+        [
+          32,
+          13
+        ],
+        [
+          32,
+          12
+        ],
+        [
+          32,
+          11
+        ],
+        [
+          32,
+          10
+        ],
+        [
+          32,
+          9
+        ],
+        [
+          32,
+          8
+        ],
+        [
+          32,
+          7
+        ],
+        [
+          32,
+          6
+        ],
+        [
+          32,
+          5
+        ]
+      ]
+    },
+    "computers": [
+      {
+        "name": "FAB-A",
+        "role": "primary",
+        "cores": 2,
+        "chip_codes": [
+          "S-01",
+          "S-03",
+          "S-05"
+        ]
+      },
+      {
+        "name": "FAB-B",
+        "role": "replica",
+        "cores": 2,
+        "chip_codes": [
+          "S-02",
+          "S-04",
+          "S-06"
+        ]
+      }
+    ]
   },
   "equations": [
     "byte = (accumulator + input) mod 256",

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import ast
 import json
+from itertools import permutations
 import math
 import random
 import shlex
@@ -251,6 +252,87 @@ GATE_ORDER = [
     "source", "and", "or", "not", "hadamard", "cnot", "phase", "t_gate", "swap", "toffoli", "measure", "bell",
     "controlled_phase", "sqrt_swap", "iswap", "fredkin", "parity", "weak_measure", "braid", "magic_state", "teleport", "dephase", "qft",
 ]
+
+
+# Program operations are lowered to these physical particle-gate primitives.
+# The synthesized netlist is matched against the gates actually placed in each
+# fabricated chip; unsupported operations therefore cannot execute.
+PROGRAM_GATE_REQUIREMENTS: Dict[str, Tuple[str, ...]] = {
+    "NOP": ("source",),
+    "CONST": ("source",),
+    "SET": ("source",),
+    "MOV": ("source",),
+    "LOAD8": ("source",),
+    "STORE8": ("source",),
+    "IMM8": ("source",),
+    "MOV8": ("source",),
+    "LOAD32": ("source",),
+    "STORE32": ("source",),
+    "EVAL": ("and", "or", "not"),
+    "CLEAR": ("source",),
+    "PIXEL": ("source", "or"),
+    "PLOT": ("source", "or"),
+    "LINE": ("source", "or"),
+    "RECT": ("source", "or"),
+    "SHOW": ("source",),
+    "ADD": ("and", "or", "not"),
+    "SUB": ("and", "or", "not"),
+    "MUL": ("and", "or", "not"),
+    "DIV": ("and", "or", "not"),
+    "ADD8": ("and", "or", "not"),
+    "SUB8": ("and", "or", "not"),
+    "AND8": ("and",),
+    "OR8": ("or",),
+    "XOR8": ("and", "or", "not"),
+    "NOT8": ("not",),
+    "INC": ("and", "or"),
+    "DEC": ("and", "not"),
+    "INC8": ("and", "or", "not"),
+    "DEC8": ("and", "or", "not"),
+    "CLAMP": ("and", "or"),
+    "NOT": ("not",),
+    "SHL8": ("and", "or", "not"),
+    "SHR8": ("and", "or", "not"),
+    "CMP8": ("and", "or", "not"),
+    "PUSH8": ("source",),
+    "POP8": ("source",),
+    "IN8": ("source",),
+    "OUT8": ("source",),
+    "CALL": ("and", "or"),
+    "RET": ("and", "or"),
+    "NOISE": ("source",),
+    "RANDOM": ("source",),
+    "OBSERVE": ("source",),
+    "INPUT": ("source",),
+    "BAYES": ("and", "or", "not"),
+    "HADAMARD": ("hadamard",),
+    "CPHASE": ("controlled_phase",),
+    "SQRTSWAP": ("sqrt_swap",),
+    "ISWAP": ("iswap",),
+    "FREDKIN": ("fredkin",),
+    "PARITY": ("parity",),
+    "WEAKMEASURE": ("weak_measure",),
+    "BRAID": ("braid",),
+    "MAGICSTATE": ("magic_state",),
+    "TELEPORT": ("teleport",),
+    "DEPHASE": ("dephase",),
+    "QFT": ("qft",),
+    "MEASURE": ("measure",),
+    "LANE": ("source",),
+    "CORE": ("source",),
+    "SEND": ("source",),
+    "OUTPUT": ("source",),
+    "PRINT": ("source",),
+    "WAIT": ("source",),
+    "JMP": ("source",),
+    "JNZ": ("and", "or"),
+    "JZ": ("and", "not"),
+    "JZ8": ("and", "not"),
+    "JNZ8": ("and", "or"),
+    "JC8": ("and", "or"),
+    "JNC8": ("and", "not"),
+    "HALT": ("source",),
+}
 
 
 @dataclass(frozen=True)
@@ -594,25 +676,46 @@ class LabModel:
         self.cluster_enabled = bool(cluster_config.get("enabled", False))
         self.cluster_link_type = str(link_config.get("type", "firewire"))
         self.cluster_link_name = str(link_config.get("name", "FIRELINK-0"))
+        self.cluster_link_layer = max(0, int(link_config.get("layer", 2)))
         self.cluster_latency_ticks = min(32, max(0, int(link_config.get("latency_ticks", 2))))
         self.cluster_shared_memory = bool(cluster_config.get("shared_memory", True))
         self.cluster_worker_specs: List[Tuple[str, str, int]] = []
+        self.cluster_computer_chip_codes: Dict[str, List[str]] = {}
+        self.cluster_link_cells: List[GridCell] = []
+        all_chip_codes = [chip.code for chip in CHIPS]
         raw_computers = cluster_config.get("computers", [])
         if self.cluster_enabled and isinstance(raw_computers, list):
-            for computer_index, raw_computer in enumerate(raw_computers[:2], 1):
-                if not isinstance(raw_computer, dict):
-                    continue
+            computer_records = [item for item in raw_computers[:2] if isinstance(item, dict)]
+            for computer_index, raw_computer in enumerate(computer_records, 1):
                 computer_name = str(raw_computer.get("name", f"COMPUTER-{computer_index}"))
+                raw_codes = raw_computer.get("chip_codes", raw_computer.get("chips"))
+                if isinstance(raw_codes, list):
+                    chip_codes = [str(code) for code in raw_codes if str(code) in all_chip_codes]
+                else:
+                    chip_codes = [code for index, code in enumerate(all_chip_codes) if index % max(1, len(computer_records)) == computer_index - 1]
+                if not chip_codes:
+                    chip_codes = list(all_chip_codes)
+                self.cluster_computer_chip_codes[computer_name] = chip_codes
                 core_count = min(8, max(1, int(raw_computer.get("cores", 2))))
                 for core_index in range(core_count):
                     self.cluster_worker_specs.append((computer_name, computer_name, core_index))
+        raw_link_cells = link_config.get("cells", [])
+        if isinstance(raw_link_cells, list) and raw_link_cells:
+            self.cluster_link_cells = [_cell(item, "cluster.link.cells") for item in raw_link_cells]
+        else:
+            self.cluster_link_cells = list(self.layer_bus_cells.get(self.cluster_link_layer, self.layer_bus_cells.get(2, self.layer_bus_cells.get(1, []))))
         if not self.cluster_worker_specs:
             self.cluster_enabled = False
             self.cluster_worker_specs = [("LOCAL", "LOCAL", 0)]
+            self.cluster_computer_chip_codes = {"LOCAL": list(code for code in all_chip_codes)}
         self.cluster_tick = 0
         self.cluster_transfers = 0
         self.cluster_link_queue: List[Dict[str, Any]] = []
         self.cluster_shared_bus_value = 0.0
+        self.cluster_link_signal = 0.0
+        self.cluster_link_hops = max(1, len(self.cluster_link_cells) - 1)
+        self.cluster_link_hop = 0
+        self.cluster_link_direction = "hold"
         self.cluster_last_transfer = "IDLE"
         self.infinite_supply = bool(self.config.get("infinite_supply", True))
         self.lithography_regions = self._load_lithography_regions(self.config.get("lithography", {}))
@@ -637,6 +740,7 @@ class LabModel:
             )
             for chip in CHIPS
         }
+        self.gate_sequence_specs: Dict[str, List[Tuple[str, ...]]] = self._load_gate_sequence_specs()
         self._seed_configured_logic()
         self.operations = 0
         self.completed_runs = 0
@@ -673,6 +777,16 @@ class LabModel:
         self.program_bus_value = 0.0
         self.program_output: List[str] = []
         self.program_error = ""
+        self.program_fabrication_blocked = False
+        self.program_netlist: List[Dict[str, Any]] = []
+        self.program_netlists_by_computer: Dict[str, List[Dict[str, Any]]] = {}
+        self.program_synthesis_errors_by_computer: Dict[str, str] = {}
+        self.program_synthesis_error = ""
+        self.program_synthesis_last = ""
+        self.program_synthesis_cycles = 0
+        self.program_physical_signal = 0.0
+        self.program_virtual_ops = 0
+        self.program_virtual_last = ""
         self.program_input_value = 0.0
         self.program_workers: List[Dict[str, Any]] = []
         self.program_active_worker = 0
@@ -793,6 +907,28 @@ class LabModel:
             })
         return regions
 
+    def _load_gate_sequence_specs(self) -> Dict[str, List[Tuple[str, ...]]]:
+        """Load optional chip contracts for custom gate acceptance sequences."""
+        specifications: Dict[str, List[Tuple[str, ...]]] = {}
+        for raw_chip in self.config.get("chips", []):
+            if not isinstance(raw_chip, dict):
+                continue
+            code = str(raw_chip.get("code", ""))
+            raw_sequences = raw_chip.get("accepted_gate_sequences", raw_chip.get("gate_sequences", []))
+            if isinstance(raw_sequences, dict):
+                raw_sequences = list(raw_sequences.values())
+            if not isinstance(raw_sequences, list):
+                continue
+            for raw_sequence in raw_sequences:
+                if isinstance(raw_sequence, dict):
+                    raw_sequence = raw_sequence.get("sequence", raw_sequence.get("gates", []))
+                if not isinstance(raw_sequence, (list, tuple)):
+                    continue
+                sequence = tuple(str(gate).strip().lower() for gate in raw_sequence if str(gate).strip().lower() in GATE_TYPES)
+                if sequence:
+                    specifications.setdefault(code, []).append(sequence)
+        return specifications
+
     def _seed_configured_logic(self) -> None:
         for raw_chip in self.config.get("chips", []):
             if not isinstance(raw_chip, dict):
@@ -867,6 +1003,12 @@ class LabModel:
 
     def _boot_working_computer(self) -> None:
         """Populate the built-in demo as a live computer on first launch."""
+        # Commission the physical interconnect before starting the program.
+        for layer, path_cells in self.layer_bus_cells.items():
+            for x, y in path_cells:
+                voxel = (x, y, layer)
+                self.voxels[voxel] = "copper"
+                self.voxel_directions[voxel] = "east"
         for chip in CHIPS:
             for (x, y), material in chip.pattern.items():
                 voxel = (x, y, 1)
@@ -910,6 +1052,10 @@ class LabModel:
             "tm_state": self.turing_start_state,
             "tm_steps": 0,
             "graphics": [],
+            "physical_signal": 0.0,
+            "synth_stage": "",
+            "virtual_ops": 0,
+            "virtual_last": "",
             "running": False,
             "halted": False,
             "wait": 0,
@@ -942,6 +1088,10 @@ class LabModel:
             "tm_state": self.turing_state,
             "tm_steps": self.turing_steps,
             "graphics": list(self.program_graphics),
+            "physical_signal": self.program_physical_signal,
+            "synth_stage": self.program_synthesis_last,
+            "virtual_ops": self.program_virtual_ops,
+            "virtual_last": self.program_virtual_last,
             "output": list(self.program_output),
             "error": self.program_error,
         })
@@ -972,6 +1122,10 @@ class LabModel:
         self.turing_state = str(worker.get("tm_state", self.turing_start_state))
         self.turing_steps = int(worker.get("tm_steps", 0))
         self.program_graphics = list(worker.get("graphics", []))
+        self.program_physical_signal = float(worker.get("physical_signal", 0.0))
+        self.program_synthesis_last = str(worker.get("synth_stage", ""))
+        self.program_virtual_ops = int(worker.get("virtual_ops", self.program_virtual_ops))
+        self.program_virtual_last = str(worker.get("virtual_last", ""))
         self.program_output = list(worker["output"])
         self.program_error = str(worker["error"])
 
@@ -985,18 +1139,50 @@ class LabModel:
         self.cluster_tick = 0
         self.cluster_transfers = 0
         self.cluster_shared_bus_value = 0.0
+        self.cluster_link_signal = 0.0
+        self.cluster_link_hop = 0
+        self.cluster_link_direction = "hold"
         self.cluster_last_transfer = "IDLE"
         self._load_program_worker(0, save_current=False)
+
+    def _cluster_link_direction(self, hop: int = 0) -> str:
+        if len(self.cluster_link_cells) < 2:
+            return "hold"
+        index = min(max(0, int(hop)), len(self.cluster_link_cells) - 2)
+        first = self.cluster_link_cells[index]
+        second = self.cluster_link_cells[index + 1]
+        dx = second[0] - first[0]
+        dy = second[1] - first[1]
+        horizontal = "east" if dx > 0 else "west" if dx < 0 else ""
+        vertical = "south" if dy > 0 else "north" if dy < 0 else ""
+        return (vertical + horizontal) if horizontal and vertical else horizontal or vertical or "hold"
+
+    def _update_cluster_link_carrier(self) -> None:
+        if not self.cluster_link_queue:
+            self.cluster_link_hop = 0
+            self.cluster_link_direction = "hold"
+            return
+        packet = min(self.cluster_link_queue, key=lambda item: int(item.get("sent", self.cluster_tick)))
+        elapsed = max(0, self.cluster_tick - int(packet.get("sent", self.cluster_tick)))
+        self.cluster_link_hops = max(1, len(self.cluster_link_cells) - 1)
+        if self.cluster_link_hops <= 1:
+            self.cluster_link_hop = 0
+        else:
+            self.cluster_link_hop = min(self.cluster_link_hops - 1, int(elapsed * self.cluster_link_hops / max(1, self.cluster_latency_ticks)))
+        self.cluster_link_direction = self._cluster_link_direction(self.cluster_link_hop)
+        self.cluster_link_signal = float(packet.get("value", self.cluster_link_signal))
 
     def _deliver_cluster_packets(self) -> None:
         if not self.cluster_enabled:
             return
+        self._update_cluster_link_carrier()
         due = [packet for packet in self.cluster_link_queue if packet["due"] <= self.cluster_tick]
         self.cluster_link_queue = [packet for packet in self.cluster_link_queue if packet["due"] > self.cluster_tick]
         for packet in due:
             target = self.program_workers[packet["target"]]
             target["input_value"] = float(packet["value"])
-            self.cluster_last_transfer = f"{packet['source_name']} → {target['name']} {packet['value']:0.4f}"
+            self.cluster_last_transfer = f"{packet['source_name']} → {target['name']} carrier {packet['value']:0.4f}"
+        self._update_cluster_link_carrier()
 
     def _transmit_cluster_packets(self) -> None:
         if not self.cluster_enabled or len(self.cluster_worker_specs) < 2:
@@ -1007,14 +1193,21 @@ class LabModel:
                 computers.append(computer)
         if len(computers) < 2:
             return
+        # FireWire carries the output of the fabricated gate stage, not a
+        # second software-only copy of the program bus.  Each computer's
+        # carrier has already passed through its own chip bank above.
         values: Dict[str, List[float]] = {computer: [] for computer in computers}
         for worker in self.program_workers:
-            values[worker["computer"]].append(float(worker["bus_value"]))
+            values[worker["computer"]].append(float(worker.get("physical_signal", 0.0)))
         computer_values = {
             computer: sum(samples) / len(samples) if samples else 0.0
             for computer, samples in values.items()
         }
         self.cluster_shared_bus_value = sum(computer_values.values()) / max(1, len(computer_values))
+        self.cluster_link_hops = max(1, len(self.cluster_link_cells) - 1)
+        self.cluster_link_hop = 0
+        self.cluster_link_direction = self._cluster_link_direction(0)
+        self.cluster_link_signal = self.cluster_shared_bus_value
         for source_computer, source_value in computer_values.items():
             for target_computer in computers:
                 if target_computer == source_computer:
@@ -1022,10 +1215,12 @@ class LabModel:
                 targets = [index for index, worker in enumerate(self.program_workers) if worker["computer"] == target_computer]
                 for target in targets:
                     self.cluster_link_queue.append({
+                        "sent": self.cluster_tick,
                         "due": self.cluster_tick + self.cluster_latency_ticks,
                         "target": target,
                         "value": source_value,
                         "source_name": source_computer,
+                        "route_hops": self.cluster_link_hops,
                     })
                 self.cluster_transfers += 1
 
@@ -1160,11 +1355,138 @@ class LabModel:
                     raise ValueError(f"LITHO-ISA line {line_number}: unknown label {label or '<missing>'}")
         return instructions, labels
 
+    def _synthesis_requirements(self, opcode: str) -> Tuple[str, ...]:
+        return PROGRAM_GATE_REQUIREMENTS.get(str(opcode).upper(), ("source",))
+
+    def _program_synthesis_stream(self) -> List[Tuple[str, List[str], int, str]]:
+        if self.is_turing:
+            return [
+                (f"TURING {state}/{read}", [], index, f"{state} READ {read}")
+                for index, ((state, read), _transition) in enumerate(sorted(self.turing_transitions.items()))
+            ]
+        return list(self.program_instructions)
+
+    def _build_synthesis_for_chips(
+        self,
+        stream: List[Tuple[str, List[str], int, str]],
+        allowed_codes: Optional[List[str]] = None,
+        computer: str = "",
+    ) -> Tuple[List[Dict[str, Any]], str]:
+        allowed = set(allowed_codes) if allowed_codes is not None else {chip.code for chip in CHIPS}
+        netlist: List[Dict[str, Any]] = []
+        error = ""
+        load_counts = {chip.code: 0 for chip in CHIPS if chip.code in allowed}
+        for index, (opcode, args, line_number, raw) in enumerate(stream):
+            operation = "TURING" if self.is_turing else opcode
+            required = ("source", "and", "or") if self.is_turing else self._synthesis_requirements(opcode)
+            candidates = []
+            for chip_index, chip in enumerate(CHIPS):
+                if chip.code not in allowed:
+                    continue
+                logic = self.chip_logic.get(chip.code)
+                if logic is None:
+                    continue
+                placed = set(logic.gates.values())
+                if all(gate in placed for gate in required):
+                    candidates.append((load_counts[chip.code], len(placed) - len(required), chip_index, chip))
+            if not candidates:
+                if not error:
+                    line_label = f"line {line_number}" if line_number else f"stage {index + 1}"
+                    server_label = f" on {computer}" if computer else ""
+                    error = (
+                        f"{line_label}: {operation} needs "
+                        f"{', '.join(GATE_TYPES[gate].label for gate in required)} "
+                        f"on one fabricated chip{server_label}"
+                    )
+                continue
+            _load, _surplus, _chip_index, chip = min(candidates, key=lambda item: item[:3])
+            logic = self.chip_logic[chip.code]
+            slots = []
+            for gate in required:
+                slot = next(slot for slot, placed_gate in logic.gates.items() if placed_gate == gate)
+                slots.append(list(slot))
+            stage = {
+                "pc": index,
+                "opcode": operation,
+                "chip": chip.code,
+                "computer": computer,
+                "gates": list(required),
+                "gate_labels": [GATE_TYPES[gate].label for gate in required],
+                "slots": slots,
+                "latency": max(1, len(required)),
+                "source": raw,
+            }
+            netlist.append(stage)
+            load_counts[chip.code] += 1
+        return netlist, error
+
+    def _synthesize_program(self) -> None:
+        """Lower the program into server-specific physical gate netlists."""
+        stream = self._program_synthesis_stream()
+        self.program_netlist, self.program_synthesis_error = self._build_synthesis_for_chips(stream)
+        self.program_netlists_by_computer = {}
+        self.program_synthesis_errors_by_computer = {}
+        if self.cluster_enabled:
+            for computer, chip_codes in self.cluster_computer_chip_codes.items():
+                netlist, error = self._build_synthesis_for_chips(stream, chip_codes, computer)
+                self.program_netlists_by_computer[computer] = netlist
+                self.program_synthesis_errors_by_computer[computer] = error
+
+    def _active_computer_name(self) -> str:
+        if self.cluster_enabled and self.program_workers and 0 <= self.program_active_worker < len(self.program_workers):
+            return str(self.program_workers[self.program_active_worker].get("computer", ""))
+        return ""
+
+    def _active_synthesis_netlist(self) -> List[Dict[str, Any]]:
+        computer = self._active_computer_name()
+        return self.program_netlists_by_computer.get(computer, self.program_netlist)
+
+    def _active_synthesis_error(self) -> str:
+        computer = self._active_computer_name()
+        return self.program_synthesis_errors_by_computer.get(computer, self.program_synthesis_error)
+
+    def _gate_carrier(self, stage: Dict[str, Any], signal: float) -> float:
+        """Propagate a carrier through the synthesized particle gates."""
+        carrier = min(1.0, max(0.0, float(signal)))
+        for gate in stage.get("gates", []):
+            if gate == "not":
+                carrier = 1.0 - carrier
+            elif gate == "and":
+                carrier *= carrier
+            elif gate == "or":
+                carrier = 1.0 - (1.0 - carrier) * (1.0 - carrier)
+            elif gate == "hadamard":
+                carrier = min(1.0, max(0.0, (carrier + 0.5) / math.sqrt(2.0)))
+            elif gate == "measure":
+                carrier = 1.0 if carrier >= 0.5 else 0.0
+            elif gate in {"dephase", "weak_measure"}:
+                carrier = 0.5 + (carrier - 0.5) * 0.82
+            else:
+                phase = (GATE_ORDER.index(gate) + 1) * 0.17 if gate in GATE_ORDER else 0.17
+                carrier = 0.5 + 0.5 * math.sin(carrier * math.pi + phase)
+        return min(1.0, max(0.0, carrier))
+
+    def _activate_synthesized_stage(self, index: int) -> Dict[str, Any]:
+        netlist = self._active_synthesis_netlist()
+        synthesis_error = self._active_synthesis_error()
+        if not netlist:
+            raise ValueError(synthesis_error or "program has no synthesized lithography stages")
+        stage = netlist[index % len(netlist)]
+        self.program_synthesis_last = (
+            f"{stage['chip']} // {stage['opcode']} // "
+            f"{'>'.join(stage['gate_labels'])}"
+        )
+        self.program_virtual_last = self.program_synthesis_last
+        self.program_synthesis_cycles += int(stage.get("latency", 1))
+        self.program_physical_signal = self._gate_carrier(stage, self.program_bus_value)
+        return stage
+
     def load_program(self, source: str, announce: bool = True) -> None:
         self.program_source = str(source)
         if self.is_turing:
             self.program_instructions = []
             self.program_labels = {}
+            self._synthesize_program()
             self.reset_program(announce=False)
             if announce:
                 self.last_event = f"PROGRAM LOAD // {len(self.turing_transitions)} transitions // TURING MACHINE"
@@ -1172,6 +1494,7 @@ class LabModel:
         instructions, labels = self._compile_program(source)
         self.program_instructions = instructions
         self.program_labels = labels
+        self._synthesize_program()
         self.reset_program(announce=False)
         if announce:
             self.last_event = f"PROGRAM LOAD // {len(instructions)} instructions // {self.program_architecture}"
@@ -1196,14 +1519,87 @@ class LabModel:
         self.turing_steps = 0
         self.program_output = []
         self.program_error = ""
+        self.program_fabrication_blocked = False
+        self.program_synthesis_last = ""
+        self.program_synthesis_cycles = 0
+        self.program_physical_signal = 0.0
+        self.program_virtual_ops = 0
+        self.program_virtual_last = ""
         self._reset_program_workers()
         if announce:
             self.last_event = "PROGRAM RESET // all cluster cores cleared" if self.cluster_enabled else "PROGRAM RESET // registers cleared"
+
+    def chip_material(self, cell: GridCell) -> Optional[str]:
+        """Return the material on the chip's layer-one fabrication face."""
+        return self.voxels.get((cell[0], cell[1], 1))
+
+    def fabrication_report(self) -> Dict[str, Any]:
+        """Report whether the physical lithography is commissioned for code."""
+        failures: List[str] = []
+        for chip in CHIPS:
+            result = self.results[chip.code]
+            matched = sum(self.chip_material(cell) == required for cell, required in chip.pattern.items())
+            logic = self.chip_logic[chip.code]
+            logic_ok = len(logic.gates) >= chip.gate_target and logic.connected_ports == chip.port_total
+            if matched != result.total:
+                failures.append(f"{chip.code} lithography {matched}/{result.total}")
+            elif not logic_ok:
+                failures.append(f"{chip.code} gates/ports {len(logic.gates)}/{chip.gate_target} {logic.connected_ports}/{chip.port_total}")
+            elif not result.passed:
+                failures.append(f"{chip.code} needs exposure")
+        chip_cells = {cell for chip in CHIPS for cell in chip.pattern}
+        conductive = {"copper", "via", "gold", "signal", "clock", "power", "ground"}
+        missing_routes = [
+            (layer, cell)
+            for layer, cells in self.layer_bus_cells.items()
+            for cell in cells
+            if self.voxels.get((cell[0], cell[1], layer)) not in conductive
+            and not (layer == 1 and cell in chip_cells and self.chip_material(cell) in MATERIALS)
+        ]
+        if missing_routes:
+            failures.append(f"bus route {len(missing_routes)} cells")
+        if self.cluster_enabled:
+            missing_link = [
+                cell for cell in self.cluster_link_cells
+                if self.voxels.get((cell[0], cell[1], self.cluster_link_layer)) not in conductive
+                and not (self.cluster_link_layer == 1 and cell in chip_cells and self.chip_material(cell) in MATERIALS)
+            ]
+            if missing_link:
+                failures.append(f"{self.cluster_link_type.upper()} link {len(missing_link)} cells")
+        return {
+            "ready": not failures,
+            "failures": failures,
+            "missing_routes": missing_routes,
+        }
+
+    def _fabrication_gate(self) -> bool:
+        self._synthesize_program()
+        report = self.fabrication_report()
+        synthesis_errors = [error for error in [self.program_synthesis_error, *self.program_synthesis_errors_by_computer.values()] if error]
+        if synthesis_errors:
+            report["ready"] = False
+            report["failures"].insert(0, f"SYNTH WAIT // {synthesis_errors[0]}")
+        if report["ready"]:
+            self.program_fabrication_blocked = False
+            return True
+        self.program_fabrication_blocked = True
+        self.program_running = False
+        for worker in self.program_workers:
+            worker["running"] = False
+        reason = "; ".join(report["failures"][:3])
+        if len(report["failures"]) > 3:
+            reason += f"; +{len(report['failures']) - 3} more"
+        self.program_output.append(f"FAB WAIT // {reason}")
+        self.program_output = self.program_output[-12:]
+        self.last_event = f"FAB WAIT // {reason}"
+        return False
 
     def start_program(self, announce: bool = True) -> None:
         if not self.program_instructions and not self.is_turing:
             self.program_error = "program has no instructions"
             self.last_event = "PROGRAM ERROR // no instructions"
+            return
+        if not self._fabrication_gate():
             return
         self._save_active_program_worker()
         if any(bool(worker["halted"]) for worker in self.program_workers):
@@ -1298,8 +1694,11 @@ class LabModel:
         self._save_active_program_worker()
         return True
 
-    def step_program(self) -> bool:
+    def step_program(self, check_fabrication: bool = True) -> bool:
+        if check_fabrication and not self._fabrication_gate():
+            return False
         if self.is_turing:
+            self._activate_synthesized_stage(self.turing_steps)
             return self._step_turing()
         if self.program_halted or not self.program_instructions:
             return False
@@ -1316,6 +1715,7 @@ class LabModel:
             return False
         opcode, args, line_number, _ = self.program_instructions[self.program_pc]
         self.program_pc += 1
+        stage = self._activate_synthesized_stage(self.program_pc - 1)
         try:
             if opcode == "NOP":
                 pass
@@ -1687,12 +2087,15 @@ class LabModel:
             self.last_event = f"PROGRAM ERROR // {self.program_error}"
             self._save_active_program_worker()
             return False
+        self.program_physical_signal = self._gate_carrier(stage, self.program_bus_value)
         self.program_clock += 1
         self._save_active_program_worker()
         return True
 
     def run_program(self, steps: Optional[int] = None) -> int:
         budget = min(4096, max(1, int(steps if steps is not None else self.program_speed)))
+        if self.program_running and not self._fabrication_gate():
+            return 0
         if self.cluster_enabled:
             self._save_active_program_worker()
             if not any(bool(worker["running"]) for worker in self.program_workers):
@@ -1704,7 +2107,7 @@ class LabModel:
                 self._load_program_worker(index)
                 local_steps = 0
                 while self.program_running and not self.program_halted and local_steps < budget:
-                    if not self.step_program():
+                    if not self.step_program(check_fabrication=False):
                         break
                     local_steps += 1
                 total += local_steps
@@ -1716,12 +2119,13 @@ class LabModel:
             return 0
         executed = 0
         while self.program_running and not self.program_halted and executed < budget:
-            if not self.step_program():
+            if not self.step_program(check_fabrication=False):
                 break
             executed += 1
         return executed
 
     def program_status(self) -> str:
+        self._synthesize_program()
         if self.cluster_enabled:
             self._save_active_program_worker()
             running_count = sum(bool(worker["running"]) for worker in self.program_workers)
@@ -1740,21 +2144,36 @@ class LabModel:
         else:
             state = "PAUSED"
         output = self.program_output[-1] if self.program_output else "-"
+        active_netlist = self._active_synthesis_netlist()
+        active_synthesis_error = self._active_synthesis_error()
+        all_synthesis_errors = [error for error in [self.program_synthesis_error, *self.program_synthesis_errors_by_computer.values()] if error]
+        fabrication = "FAB READY" if self.fabrication_report()["ready"] and not all_synthesis_errors else "FAB WAIT"
+        synth_chip = self.program_synthesis_last.split(" // ", 1)[0] if self.program_synthesis_last else "-"
+        synth_server = self._active_computer_name()
+        synth_target = f"{synth_server}:{synth_chip}" if synth_server else synth_chip
+        synthesis = (
+            f"SYNTH {len(active_netlist):03d} STAGES/{sum(int(stage.get('latency', 1)) for stage in active_netlist):03d} GATES @{synth_target}"
+            if not active_synthesis_error else "SYNTH WAIT"
+        )
         cluster = ""
         if self.cluster_enabled:
-            lanes = "/".join(f"{worker['bus_value']:0.2f}" for worker in self.program_workers)
-            cluster = f"  DUAL-SERVER {running_count}/{len(self.program_workers)}  {self.cluster_link_type.upper()} {self.cluster_latency_ticks}T TX{self.cluster_transfers}  LANES {lanes}"
+            lanes = "/".join(f"{worker.get('physical_signal', 0.0):0.2f}" for worker in self.program_workers)
+            cluster = (
+                f"  DUAL-SERVER {running_count}/{len(self.program_workers)}"
+                f"  {self.cluster_link_type.upper()} {self.cluster_latency_ticks}T TX{self.cluster_transfers}"
+                f"  CARRIERS {lanes}  HOP {self.cluster_link_hop + 1:02d}/{self.cluster_link_hops:02d}"
+            )
         if self.is_turing:
             tape_window = "".join(self.turing_tape.get(position, self.turing_blank) for position in range(self.turing_head - 8, self.turing_head + 9))
-            return f"{state} TURING STATE={self.turing_state} HEAD={self.turing_head:+04d} STEPS={self.turing_steps:04d} SPEED={self.program_speed:03d}{cluster} TAPE[{tape_window}] OUT {output[:18]}"
+            return f"{state} {fabrication} {synthesis} TURING STATE={self.turing_state} HEAD={self.turing_head:+04d} STEPS={self.turing_steps:04d} SPEED={self.program_speed:03d}{cluster} TAPE[{tape_window}] OUT {output[:18]}"
         if self.is_soc:
             register_summary = " ".join(f"R{index}={float(self.program_registers[f'R{index}']):0.3f}" for index in range(4))
-            return f"{state} SOC-32 PC {self.program_pc:03d}/{len(self.program_instructions):03d}  SPEED {self.program_speed:03d}  MEM {self.program_memory_size // 1024}K  GFX {len(self.program_graphics):04d}  {register_summary}{cluster}  OUT {output[:20]}"
+            return f"{state} {fabrication} {synthesis} SOC-32 PC {self.program_pc:03d}/{len(self.program_instructions):03d}  SPEED {self.program_speed:03d}  MEM {self.program_memory_size // 1024}K  GFX {len(self.program_graphics):04d}  {register_summary}{cluster}  OUT {output[:20]}"
         if self.is_8bit:
             register_summary = " ".join(f"R{index}={int(self.program_registers[f'R{index}']) & 0xFF:02X}" for index in range(4))
             flags = "".join(name if self.program_flags.get(name, False) else "-" for name in ("Z", "N", "C", "V"))
-            return f"{state} LITHO-8 PC {self.program_pc:03d}/{len(self.program_instructions):03d}  SPEED {self.program_speed:03d}  {register_summary} FLAGS={flags} SP={self.program_stack_pointer:02X}{cluster}  OUT {output[:20]}"
-        return f"{state} PC {self.program_pc:03d}/{len(self.program_instructions):03d}  SPEED {self.program_speed:03d}{cluster}  OUT {output[:20]}"
+            return f"{state} {fabrication} {synthesis} LITHO-8 PC {self.program_pc:03d}/{len(self.program_instructions):03d}  SPEED {self.program_speed:03d}  {register_summary} FLAGS={flags} SP={self.program_stack_pointer:02X}{cluster}  OUT {output[:20]}"
+        return f"{state} {fabrication} {synthesis} PC {self.program_pc:03d}/{len(self.program_instructions):03d}  SPEED {self.program_speed:03d}{cluster}  OUT {output[:20]}"
 
     def valid_cell(self, cell: GridCell) -> bool:
         # Grid coordinates are intentionally unbounded. This method remains as
@@ -2012,6 +2431,21 @@ class LabModel:
             "auto_start": bool(self.program_running),
             "speed": self.program_speed,
             "source": self.program_source,
+            "synthesis": {
+                "stage_count": len(self.program_netlist),
+                "gate_cycles": sum(int(stage.get("latency", 1)) for stage in self.program_netlist),
+                "last_stage": self.program_synthesis_last,
+                "error": self.program_synthesis_error,
+                "netlist": list(self.program_netlist),
+                "servers": {
+                    computer: {
+                        "chip_codes": list(self.cluster_computer_chip_codes.get(computer, [])),
+                        "error": error,
+                        "netlist": list(self.program_netlists_by_computer.get(computer, [])),
+                    }
+                    for computer, error in self.program_synthesis_errors_by_computer.items()
+                },
+            },
         }
         if self.is_8bit:
             data["program"]["memory_size"] = self.program_memory_size
@@ -2089,7 +2523,7 @@ class LabModel:
         ranked: List[Tuple[float, ChipSpec]] = []
         for chip in candidates:
             result = self.results[chip.code]
-            result.matched = sum(self.top_material(cell) == required for cell, required in chip.pattern.items())
+            result.matched = sum(self.chip_material(cell) == required for cell, required in chip.pattern.items())
             ranked.append((result.ratio, chip))
         chip = max(ranked, key=lambda item: item[0])[1]
         result = self.results[chip.code]
@@ -2111,7 +2545,7 @@ class LabModel:
         for chip in CHIPS:
             result = self.results[chip.code]
             if not result.exposed:
-                result.matched = sum(self.top_material(cell) == required for cell, required in chip.pattern.items())
+                result.matched = sum(self.chip_material(cell) == required for cell, required in chip.pattern.items())
 
     def system_output(self) -> str:
         passed = sum(result.passed for result in self.results.values())
@@ -2284,13 +2718,13 @@ class LabModel:
         exposed = sum(result.exposed for result in self.results.values())
         # Four routed traces are intentionally required for a perfect bus.
         routes = [(layer, cell) for layer, cells in self.layer_bus_cells.items() for cell in cells]
-        routed = sum(self.voxels.get((cell[0], cell[1], layer)) == "copper" for layer, cell in routes)
+        routed = sum(self.voxels.get((cell[0], cell[1], layer)) in {"copper", "via", "gold", "signal", "clock", "power", "ground"} for layer, cell in routes)
         return min(1.0, 0.16 + passed * 0.16 + exposed * 0.04 + routed / max(1, len(routes)) * 0.48)
 
     def full_pattern_for(self, chip: ChipSpec) -> None:
         """Deterministic helper used only by --self-test."""
         for cell, material in chip.pattern.items():
-            if self.top_material(cell) != material:
+            if self.chip_material(cell) != material:
                 # Remove any upper material until the base substrate is exposed.
                 while self.top_z(cell) is not None and self.top_z(cell) > 0:
                     self.break_top(cell)
@@ -2546,6 +2980,8 @@ class LithoLab:
     def block_is_active(self, x: int, y: int, z: int, material: str) -> bool:
         if material not in ACTIVE_BLOCKS and material not in GATE_TYPES:
             return False
+        if not self.model.program_running:
+            return False
         health = self.model.bus_health()
         if health <= 0.24:
             return False
@@ -2572,6 +3008,8 @@ class LithoLab:
 
     def bus_packet_state(self, cells: List[GridCell]) -> Optional[Tuple[GridCell, GridCell, float, str, int, int]]:
         """Return the packet's current segment and hop-local direction."""
+        if not self.model.program_running:
+            return None
         if len(cells) < 2:
             return None
         hop_count = len(cells) - 1
@@ -3375,10 +3813,13 @@ class LithoLab:
         text(x0, screen_y - 52, "PROGRAM // LITHO-ISA", fill="#d6a7ff", size=8, bold=True)
         text(x1, screen_y - 52, status_head, fill=self.GREEN if not self.model.program_error else self.RED, size=7, bold=True, anchor="ne")
         if self.model.cluster_enabled:
-            link_text = f"{self.model.cluster_link_name} // {self.model.cluster_last_transfer[:22]} // TX {self.model.cluster_transfers}"
-            lane_text = "/".join(f"{worker['bus_value']:0.2f}" for worker in self.model.program_workers)
+            lane_text = "/".join(f"{worker.get('physical_signal', 0.0):0.2f}" for worker in self.model.program_workers)
+            link_text = (
+                f"{self.model.cluster_link_name} // {self.model.cluster_last_transfer[:18]}"
+                f" // CARRIER {self.model.cluster_link_signal:0.2f}"
+            )
             text(x0, screen_y - 34, link_text[:48], fill="#82d9de", size=7)
-            text(x1, screen_y - 34, f"LANES {lane_text}"[:48], fill="#ffe76b", size=7, bold=True, anchor="ne")
+            text(x1, screen_y - 34, f"HOP {self.model.cluster_link_hop + 1:02d}/{self.model.cluster_link_hops:02d}  CARRIERS {lane_text}"[:48], fill="#ffe76b", size=7, bold=True, anchor="ne")
         if self.model.program_output:
             text(x0, screen_y - 17, "> " + self.model.program_output[-1][:48], fill="#9bbcc2", size=7)
         rect(x0, screen_y, x1, screen_bottom, fill="#06131b", outline="#3c9ca2", width=2)

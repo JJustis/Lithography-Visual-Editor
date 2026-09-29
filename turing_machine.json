@@ -5,8 +5,8 @@
     "clock_ghz": 1.0
   },
   "board": {
-    "width": 32,
-    "height": 20
+    "width": 24,
+    "height": 16
   },
   "bus": {
     "layers": {
@@ -14,284 +14,286 @@
         "path": [
           [
             -8,
-            6
+            4
           ],
           [
             -7,
-            6
+            4
           ],
           [
             -6,
-            6
+            4
           ],
           [
             -5,
-            6
+            4
           ],
           [
             -4,
-            6
+            4
           ],
           [
             -3,
-            6
+            4
           ],
           [
             -2,
-            6
+            4
           ],
           [
             -1,
-            6
+            4
           ],
           [
             0,
-            6
+            4
           ],
           [
             1,
-            6
+            4
           ],
           [
             2,
-            6
+            4
           ],
           [
             3,
-            6
+            4
           ],
           [
             4,
-            6
+            4
           ],
           [
             5,
-            6
+            4
           ],
           [
             6,
-            6
+            4
           ],
           [
             7,
-            6
+            4
           ],
           [
             8,
-            6
+            4
           ],
           [
             9,
-            6
+            4
           ],
           [
             10,
-            6
+            4
           ],
           [
             11,
-            6
+            4
           ],
           [
             12,
-            6
+            4
           ],
           [
             13,
-            6
+            4
           ],
           [
             14,
-            6
+            4
           ],
           [
             15,
-            6
+            4
           ],
           [
             16,
-            6
+            4
           ],
           [
             17,
-            6
+            4
           ],
           [
             18,
-            6
+            4
           ],
           [
             19,
-            6
+            4
+          ],
+          [
+            20,
+            4
+          ],
+          [
+            20,
+            5
           ],
           [
             20,
             6
           ],
           [
-            21,
-            6
-          ],
-          [
-            22,
-            6
-          ],
-          [
-            23,
-            6
-          ],
-          [
-            24,
-            6
-          ],
-          [
-            25,
-            6
-          ],
-          [
-            26,
-            6
-          ],
-          [
-            5,
+            20,
             7
           ],
           [
-            5,
+            20,
             8
           ],
           [
-            5,
+            20,
             9
           ],
           [
-            5,
+            20,
             10
           ],
           [
-            5,
+            20,
             11
+          ],
+          [
+            20,
+            12
+          ],
+          [
+            19,
+            12
+          ],
+          [
+            18,
+            12
+          ],
+          [
+            17,
+            12
+          ],
+          [
+            16,
+            12
+          ],
+          [
+            15,
+            12
+          ],
+          [
+            14,
+            12
+          ],
+          [
+            13,
+            12
+          ],
+          [
+            12,
+            12
+          ],
+          [
+            11,
+            12
+          ],
+          [
+            10,
+            12
+          ],
+          [
+            9,
+            12
+          ],
+          [
+            8,
+            12
+          ],
+          [
+            7,
+            12
+          ],
+          [
+            6,
+            12
+          ],
+          [
+            5,
+            12
+          ],
+          [
+            4,
+            12
+          ],
+          [
+            3,
+            12
+          ],
+          [
+            2,
+            12
           ]
         ],
         "starting_traces": [
           [
-            -8,
-            6
-          ],
-          [
-            -7,
-            6
-          ],
-          [
-            -6,
-            6
-          ],
-          [
-            -5,
-            6
-          ],
-          [
-            -4,
-            6
-          ],
-          [
-            -3,
-            6
-          ],
-          [
             -2,
-            6
+            4
           ],
           [
-            -1,
-            6
-          ],
-          [
-            0,
-            6
-          ],
-          [
-            1,
-            6
-          ],
-          [
-            2,
-            6
+            12,
+            12
           ]
         ]
       },
       "2": {
         "path": [
           [
-            5,
-            1
-          ],
-          [
-            5,
+            -3,
             2
           ],
           [
-            5,
+            -3,
             3
           ],
           [
-            5,
+            -3,
             4
           ],
           [
-            5,
+            -3,
             5
           ],
           [
-            5,
+            -3,
             6
           ],
           [
-            5,
+            -3,
             7
           ],
           [
-            5,
+            -3,
             8
           ],
           [
-            5,
+            -3,
             9
           ],
           [
-            5,
+            -3,
             10
           ],
           [
-            5,
+            -3,
             11
           ],
           [
-            5,
+            -3,
             12
-          ]
-        ],
-        "starting_traces": [
-          [
-            5,
-            4
           ],
           [
-            5,
-            5
+            -3,
+            13
           ],
-          [
-            5,
-            6
-          ],
-          [
-            5,
-            7
-          ]
-        ]
-      },
-      "3": {
-        "path": [
           [
             -2,
             13
@@ -363,24 +365,222 @@
           [
             15,
             13
+          ],
+          [
+            16,
+            13
+          ],
+          [
+            16,
+            12
+          ],
+          [
+            16,
+            11
+          ],
+          [
+            16,
+            10
+          ],
+          [
+            16,
+            9
+          ],
+          [
+            16,
+            8
+          ],
+          [
+            16,
+            7
+          ],
+          [
+            16,
+            6
+          ],
+          [
+            16,
+            5
+          ],
+          [
+            16,
+            4
+          ],
+          [
+            16,
+            3
+          ],
+          [
+            16,
+            2
           ]
         ],
         "starting_traces": [
           [
-            2,
+            -3,
+            8
+          ],
+          [
+            8,
             13
+          ]
+        ]
+      },
+      "3": {
+        "path": [
+          [
+            2,
+            2
           ],
           [
             3,
-            13
+            2
           ],
           [
             4,
-            13
+            2
           ],
           [
             5,
-            13
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            10,
+            2
+          ],
+          [
+            11,
+            2
+          ],
+          [
+            12,
+            2
+          ],
+          [
+            13,
+            2
+          ],
+          [
+            14,
+            2
+          ],
+          [
+            15,
+            2
+          ],
+          [
+            16,
+            2
+          ],
+          [
+            17,
+            2
+          ],
+          [
+            18,
+            2
+          ],
+          [
+            18,
+            3
+          ],
+          [
+            18,
+            4
+          ],
+          [
+            18,
+            5
+          ],
+          [
+            18,
+            6
+          ],
+          [
+            18,
+            7
+          ],
+          [
+            18,
+            8
+          ],
+          [
+            17,
+            8
+          ],
+          [
+            16,
+            8
+          ],
+          [
+            15,
+            8
+          ],
+          [
+            14,
+            8
+          ],
+          [
+            13,
+            8
+          ],
+          [
+            12,
+            8
+          ],
+          [
+            11,
+            8
+          ],
+          [
+            10,
+            8
+          ],
+          [
+            9,
+            8
+          ],
+          [
+            8,
+            8
+          ],
+          [
+            7,
+            8
+          ],
+          [
+            6,
+            8
+          ],
+          [
+            5,
+            8
+          ]
+        ],
+        "starting_traces": [
+          [
+            6,
+            2
+          ],
+          [
+            18,
+            6
           ]
         ]
       }
@@ -388,8 +588,8 @@
     "connections": [
       {
         "cell": [
-          5,
-          6
+          3,
+          4
         ],
         "layers": [
           1,
@@ -400,138 +600,104 @@
       },
       {
         "cell": [
-          12,
-          6
+          10,
+          4
         ],
         "layers": [
           1,
+          2,
           3
-        ],
-        "material": "copper"
-      },
-      {
-        "cell": [
-          5,
-          11
-        ],
-        "layers": [
-          1,
-          2
         ],
         "material": "via"
       },
       {
         "cell": [
-          9,
-          13
+          17,
+          4
         ],
         "layers": [
+          1,
           2,
           3
         ],
-        "material": "copper"
+        "material": "via"
+      },
+      {
+        "cell": [
+          20,
+          9
+        ],
+        "layers": [
+          1,
+          2,
+          3
+        ],
+        "material": "via"
       }
     ]
   },
   "lithography": {
     "fields": [
       {
-        "name": "SENSORY DENDRITE ARRAY",
+        "name": "TAPE TRACK",
         "origin": [
-          -8,
-          -3
+          1,
+          1
+        ],
+        "size": [
+          20,
+          3
+        ],
+        "layer": 1,
+        "pattern": "grid",
+        "pitch": 2,
+        "tint": "#63d9ff",
+        "bus_taps": [
+          [
+            10,
+            4
+          ]
+        ]
+      },
+      {
+        "name": "STATE TABLE",
+        "origin": [
+          7,
+          6
         ],
         "size": [
           12,
-          8
-        ],
-        "layer": 1,
-        "pattern": "crosshatch",
-        "pitch": 2,
-        "tint": "#55dce0",
-        "bus_taps": [
-          [
-            0,
-            6
-          ],
-          [
-            3,
-            6
-          ]
-        ]
-      },
-      {
-        "name": "SYNAPTIC WEIGHT MESH",
-        "origin": [
-          4,
-          -3
-        ],
-        "size": [
-          13,
-          12
+          5
         ],
         "layer": 2,
-        "pattern": "grid",
-        "pitch": 1,
-        "tint": "#b98cff",
+        "pattern": "crosshatch",
+        "pitch": 2,
+        "tint": "#d6a7ff",
         "bus_taps": [
           [
-            5,
-            6
-          ],
-          [
-            5,
-            9
+            16,
+            8
           ]
         ]
       },
       {
-        "name": "RECURRENT MEMORY FIELD",
+        "name": "HALT LATTICE",
         "origin": [
-          0,
-          9
+          4,
+          10
         ],
         "size": [
-          18,
-          8
+          14,
+          4
         ],
         "layer": 3,
         "pattern": "checker",
         "pitch": 2,
-        "tint": "#ff6f91",
+        "tint": "#ffe76b",
         "bus_taps": [
-          [
-            9,
-            13
-          ],
           [
             14,
-            13
-          ]
-        ]
-      },
-      {
-        "name": "BAYESIAN OBSERVATION FIELD",
-        "origin": [
-          17,
-          -3
-        ],
-        "size": [
-          12,
-          9
-        ],
-        "layer": 1,
-        "pattern": "crosshatch",
-        "pitch": 1,
-        "tint": "#ff5f91",
-        "bus_taps": [
-          [
-            19,
-            6
-          ],
-          [
-            24,
-            6
+            12
           ]
         ]
       }
@@ -545,450 +711,343 @@
   "boot_working": true,
   "chips": [
     {
-      "name": "SENSORY CORTEX",
-      "code": "N-01",
+      "name": "TAPE INPUT",
+      "code": "T-01",
       "anchor": [
-        -2,
+        1,
+        1
+      ],
+      "pattern": {
+        "0,0": "copper",
+        "1,0": "silicon",
+        "2,0": "copper",
+        "0,1": "mask",
+        "1,1": "resist",
+        "2,1": "mask"
+      },
+      "tint": "#63d9ff",
+      "output": "tape symbols entering",
+      "face_slots": {
+        "north": 1,
+        "east": 2,
+        "south": 1,
+        "west": 1
+      },
+      "gate_target": 4
+    },
+    {
+      "name": "READ WRITE HEAD",
+      "code": "T-02",
+      "anchor": [
+        8,
         1
       ],
       "pattern": {
         "0,0": "silicon",
         "1,0": "transistor",
-        "2,0": "n_type",
-        "0,1": "signal",
-        "1,1": "electron",
+        "2,0": "silicon",
+        "0,1": "copper",
+        "1,1": "gold",
         "2,1": "copper",
-        "0,2": "p_type",
-        "1,2": "hole",
+        "0,2": "silicon",
+        "1,2": "transistor",
         "2,2": "silicon"
       },
+      "tint": "#f6b85f",
+      "output": "head positioned",
       "face_slots": {
         "north": 2,
-        "east": 3,
-        "south": 2,
-        "west": 1
-      },
-      "gate_target": 8,
-      "tint": "#55dce0",
-      "output": "sensory spike train acquired",
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "source"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "and"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "or"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "not"
-        }
-      ],
-      "connected_ports": [
-        [
-          "east",
-          0
-        ],
-        [
-          "south",
-          0
-        ]
-      ]
-    },
-    {
-      "name": "SYNAPTIC CORE",
-      "code": "N-02",
-      "anchor": [
-        5,
-        1
-      ],
-      "pattern": {
-        "0,0": "p_type",
-        "1,0": "transistor",
-        "2,0": "n_type",
-        "0,1": "electron",
-        "1,1": "quantum",
-        "2,1": "hole",
-        "0,2": "copper",
-        "1,2": "signal",
-        "2,2": "silicon"
-      },
-      "face_slots": {
-        "north": 2,
-        "east": 3,
+        "east": 2,
         "south": 2,
         "west": 2
       },
-      "gate_target": 9,
-      "tint": "#b98cff",
-      "output": "synaptic weights converged",
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "hadamard"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "cnot"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "phase"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "bell"
-        }
-      ],
-      "connected_ports": [
-        [
-          "north",
-          0
-        ],
-        [
-          "west",
-          0
-        ],
-        [
-          "east",
-          0
-        ]
-      ]
+      "gate_target": 6
     },
     {
-      "name": "SPIKE THRESHOLD UNIT",
-      "code": "N-03",
+      "name": "STATE TRANSITION",
+      "code": "T-03",
       "anchor": [
-        12,
+        15,
         1
       ],
       "pattern": {
         "0,0": "n_type",
-        "1,0": "transistor",
+        "1,0": "silicon",
         "2,0": "p_type",
-        "0,1": "phonon",
+        "0,1": "copper",
         "1,1": "quantum",
-        "2,1": "ion",
-        "0,2": "silicon",
-        "1,2": "signal",
-        "2,2": "copper"
+        "2,1": "copper",
+        "0,2": "gold",
+        "1,2": "silicon",
+        "2,2": "gold"
       },
+      "tint": "#d6a7ff",
+      "output": "transition table loaded",
       "face_slots": {
-        "north": 2,
+        "north": 1,
         "east": 2,
         "south": 2,
         "west": 2
       },
-      "gate_target": 8,
-      "tint": "#ffbf69",
-      "output": "threshold crossings classified",
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "source"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "and"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "or"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "measure"
-        }
-      ],
-      "connected_ports": [
-        [
-          "west",
-          0
-        ],
-        [
-          "south",
-          0
-        ]
-      ]
+      "gate_target": 7
     },
     {
-      "name": "RECURRENT MEMORY",
-      "code": "N-04",
+      "name": "TAPE MEMORY",
+      "code": "T-04",
       "anchor": [
-        1,
-        10
+        4,
+        9
       ],
       "pattern": {
         "0,0": "silicon",
-        "1,0": "cooper_pair",
+        "1,0": "dielectric",
         "2,0": "silicon",
+        "3,0": "dielectric",
         "0,1": "copper",
-        "1,1": "qubit",
-        "2,1": "copper",
-        "0,2": "p_type",
-        "1,2": "transistor",
-        "2,2": "n_type"
+        "1,1": "mask",
+        "2,1": "mask",
+        "3,1": "copper"
       },
+      "tint": "#6ceda5",
+      "output": "infinite tape window",
       "face_slots": {
-        "north": 3,
+        "north": 2,
+        "east": 2,
+        "south": 1,
+        "west": 2
+      },
+      "gate_target": 6
+    },
+    {
+      "name": "ACCEPT REJECT OUTPUT",
+      "code": "T-05",
+      "anchor": [
+        14,
+        9
+      ],
+      "pattern": {
+        "0,0": "photon",
+        "1,0": "gold",
+        "2,0": "photon",
+        "0,1": "copper",
+        "1,1": "transistor",
+        "2,1": "copper",
+        "0,2": "silicon",
+        "1,2": "copper",
+        "2,2": "silicon"
+      },
+      "tint": "#ffe76b",
+      "output": "halting state output",
+      "face_slots": {
+        "north": 1,
         "east": 2,
         "south": 2,
         "west": 2
       },
-      "gate_target": 10,
-      "tint": "#ff6f91",
-      "output": "recurrent state retained",
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "swap"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "phase"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "t_gate"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "measure"
-        }
-      ],
-      "connected_ports": [
-        [
-          "north",
-          0
-        ],
-        [
-          "east",
-          0
-        ],
-        [
-          "west",
-          0
-        ]
-      ]
-    },
-    {
-      "name": "MOTOR OUTPUT",
-      "code": "N-05",
-      "anchor": [
-        11,
-        10
-      ],
-      "pattern": {
-        "0,0": "photon",
-        "1,0": "polariton",
-        "2,0": "plasmon",
-        "0,1": "signal",
-        "1,1": "quantum",
-        "2,1": "signal",
-        "0,2": "gold",
-        "1,2": "electron",
-        "2,2": "gold"
-      },
-      "face_slots": {
-        "north": 2,
-        "east": 3,
-        "south": 1,
-        "west": 2
-      },
-      "gate_target": 8,
-      "tint": "#7cf0c5",
-      "output": "motor command waveform emitted",
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "measure"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "hadamard"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "not"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "source"
-        }
-      ],
-      "connected_ports": [
-        [
-          "north",
-          0
-        ],
-        [
-          "west",
-          0
-        ],
-        [
-          "east",
-          0
-        ]
-      ]
-    },
-    {
-      "name": "BAYESIAN OBSERVATION ENGINE",
-      "code": "N-06",
-      "anchor": [
-        19,
-        1
-      ],
-      "pattern": {
-        "0,0": "noise_source",
-        "1,0": "observer",
-        "2,0": "bayes",
-        "3,0": "consensus",
-        "0,1": "electron",
-        "1,1": "quantum",
-        "2,1": "bayes",
-        "3,1": "signal",
-        "0,2": "phonon",
-        "1,2": "observer",
-        "2,2": "consensus",
-        "3,2": "transistor"
-      },
-      "face_slots": {
-        "north": 2,
-        "east": 3,
-        "south": 2,
-        "west": 2
-      },
-      "gate_target": 10,
-      "tint": "#ff5f91",
-      "output": "maze_flask.py posterior belief and deep-observation stream stable",
-      "source_file": "maze_flask.py",
-      "source_components": [
-        "HierarchicalPathfinder3D.observe",
-        "HierarchicalPathfinder3D.upward_pass",
-        "HierarchicalPathfinder3D.downward_pass",
-        "HierarchicalPathfinder3D.deep_obs",
-        "HierarchicalPathfinder3D.plan_path"
-      ],
-      "initial_gates": [
-        {
-          "slot": [
-            1,
-            1
-          ],
-          "gate": "source"
-        },
-        {
-          "slot": [
-            2,
-            1
-          ],
-          "gate": "and"
-        },
-        {
-          "slot": [
-            3,
-            1
-          ],
-          "gate": "hadamard"
-        },
-        {
-          "slot": [
-            4,
-            1
-          ],
-          "gate": "phase"
-        },
-        {
-          "slot": [
-            5,
-            1
-          ],
-          "gate": "measure"
-        }
-      ],
-      "connected_ports": [
-        [
-          "north",
-          0
-        ],
-        [
-          "west",
-          0
-        ],
-        [
-          "east",
-          0
-        ]
-      ]
+      "gate_target": 5
     }
   ],
   "cluster": {
-    "enabled": false
+    "enabled": true,
+    "shared_memory": true,
+    "link": {
+      "type": "firewire",
+      "name": "TAPE-FIRELINK-A/B",
+      "latency_ticks": 2,
+      "bandwidth": "fabricated-lithography-bus",
+      "layer": 2,
+      "cells": [
+        [
+          -3,
+          2
+        ],
+        [
+          -3,
+          3
+        ],
+        [
+          -3,
+          4
+        ],
+        [
+          -3,
+          5
+        ],
+        [
+          -3,
+          6
+        ],
+        [
+          -3,
+          7
+        ],
+        [
+          -3,
+          8
+        ],
+        [
+          -3,
+          9
+        ],
+        [
+          -3,
+          10
+        ],
+        [
+          -3,
+          11
+        ],
+        [
+          -3,
+          12
+        ],
+        [
+          -3,
+          13
+        ],
+        [
+          -2,
+          13
+        ],
+        [
+          -1,
+          13
+        ],
+        [
+          0,
+          13
+        ],
+        [
+          1,
+          13
+        ],
+        [
+          2,
+          13
+        ],
+        [
+          3,
+          13
+        ],
+        [
+          4,
+          13
+        ],
+        [
+          5,
+          13
+        ],
+        [
+          6,
+          13
+        ],
+        [
+          7,
+          13
+        ],
+        [
+          8,
+          13
+        ],
+        [
+          9,
+          13
+        ],
+        [
+          10,
+          13
+        ],
+        [
+          11,
+          13
+        ],
+        [
+          12,
+          13
+        ],
+        [
+          13,
+          13
+        ],
+        [
+          14,
+          13
+        ],
+        [
+          15,
+          13
+        ],
+        [
+          16,
+          13
+        ],
+        [
+          16,
+          12
+        ],
+        [
+          16,
+          11
+        ],
+        [
+          16,
+          10
+        ],
+        [
+          16,
+          9
+        ],
+        [
+          16,
+          8
+        ],
+        [
+          16,
+          7
+        ],
+        [
+          16,
+          6
+        ],
+        [
+          16,
+          5
+        ],
+        [
+          16,
+          4
+        ],
+        [
+          16,
+          3
+        ],
+        [
+          16,
+          2
+        ]
+      ]
+    },
+    "computers": [
+      {
+        "name": "FAB-A",
+        "role": "primary",
+        "cores": 2,
+        "chip_codes": [
+          "T-01",
+          "T-03",
+          "T-05"
+        ]
+      },
+      {
+        "name": "FAB-B",
+        "role": "replica",
+        "cores": 2,
+        "chip_codes": [
+          "T-02",
+          "T-04"
+        ]
+      }
+    ]
   },
   "equations": [
     "\u03b4(state, symbol) \u2192 (next_state, write_symbol, move)",

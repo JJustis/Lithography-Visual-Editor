@@ -749,15 +749,15 @@
   "equations": [
     {
       "name": "SQRT SWAP",
-      "expression": "(√SWAP)² = SWAP"
+      "expression": "(\u221aSWAP)\u00b2 = SWAP"
     },
     {
       "name": "FREDKIN",
-      "expression": "|c,a,b⟩ → |c,b,a⟩ when c=1"
+      "expression": "|c,a,b\u27e9 \u2192 |c,b,a\u27e9 when c=1"
     },
     {
       "name": "DEPHASE",
-      "expression": "ρ → (1-p)ρ + pZρZ"
+      "expression": "\u03c1 \u2192 (1-p)\u03c1 + pZ\u03c1Z"
     }
   ],
   "output": {
@@ -773,18 +773,113 @@
       "type": "firewire",
       "name": "HYBRID-FIRELINK",
       "latency_ticks": 1,
-      "bandwidth": "experimental-shared-bus"
+      "bandwidth": "fabricated-lithography-bus",
+      "layer": 2,
+      "cells": [
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          1
+        ],
+        [
+          14,
+          2
+        ],
+        [
+          14,
+          3
+        ],
+        [
+          14,
+          4
+        ],
+        [
+          14,
+          5
+        ],
+        [
+          14,
+          6
+        ],
+        [
+          14,
+          7
+        ],
+        [
+          14,
+          8
+        ],
+        [
+          14,
+          9
+        ],
+        [
+          14,
+          10
+        ],
+        [
+          14,
+          11
+        ],
+        [
+          14,
+          12
+        ],
+        [
+          14,
+          13
+        ],
+        [
+          14,
+          14
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          14,
+          16
+        ],
+        [
+          14,
+          17
+        ],
+        [
+          14,
+          18
+        ],
+        [
+          14,
+          19
+        ],
+        [
+          14,
+          20
+        ]
+      ]
     },
     "computers": [
       {
         "name": "HYBRID-A",
         "role": "experiment-source",
-        "cores": 2
+        "cores": 2,
+        "chip_codes": [
+          "H-01",
+          "H-03"
+        ]
       },
       {
         "name": "HYBRID-B",
         "role": "experiment-readout",
-        "cores": 2
+        "cores": 2,
+        "chip_codes": [
+          "H-02",
+          "H-04"
+        ]
       }
     ]
   },
@@ -908,6 +1003,14 @@
             1
           ],
           "gate": "parity"
+        },
+        {
+          "slot": [
+            0,
+            0
+          ],
+          "gate": "sqrt_swap",
+          "direction": "east"
         }
       ],
       "connected_ports": [
@@ -1038,6 +1141,22 @@
             1
           ],
           "gate": "measure"
+        },
+        {
+          "slot": [
+            0,
+            0
+          ],
+          "gate": "magic_state",
+          "direction": "east"
+        },
+        {
+          "slot": [
+            1,
+            0
+          ],
+          "gate": "weak_measure",
+          "direction": "east"
         }
       ],
       "connected_ports": [

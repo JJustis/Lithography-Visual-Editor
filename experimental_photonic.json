@@ -749,15 +749,15 @@
   "equations": [
     {
       "name": "iSWAP",
-      "expression": "|01⟩ → i|10⟩"
+      "expression": "|01\u27e9 \u2192 i|10\u27e9"
     },
     {
       "name": "QFT",
-      "expression": "|x⟩ → 1/√N Σᵧ e^(2πixy/N)|y⟩"
+      "expression": "|x\u27e9 \u2192 1/\u221aN \u03a3\u1d67 e^(2\u03c0ixy/N)|y\u27e9"
     },
     {
       "name": "TELEPORT",
-      "expression": "|ψ⟩₃ = XᵐZⁿ|ψ⟩"
+      "expression": "|\u03c8\u27e9\u2083 = X\u1d50Z\u207f|\u03c8\u27e9"
     }
   ],
   "output": {
@@ -773,18 +773,113 @@
       "type": "firewire",
       "name": "LUMEN-FIRELINK",
       "latency_ticks": 1,
-      "bandwidth": "experimental-shared-bus"
+      "bandwidth": "fabricated-lithography-bus",
+      "layer": 2,
+      "cells": [
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          1
+        ],
+        [
+          14,
+          2
+        ],
+        [
+          14,
+          3
+        ],
+        [
+          14,
+          4
+        ],
+        [
+          14,
+          5
+        ],
+        [
+          14,
+          6
+        ],
+        [
+          14,
+          7
+        ],
+        [
+          14,
+          8
+        ],
+        [
+          14,
+          9
+        ],
+        [
+          14,
+          10
+        ],
+        [
+          14,
+          11
+        ],
+        [
+          14,
+          12
+        ],
+        [
+          14,
+          13
+        ],
+        [
+          14,
+          14
+        ],
+        [
+          14,
+          15
+        ],
+        [
+          14,
+          16
+        ],
+        [
+          14,
+          17
+        ],
+        [
+          14,
+          18
+        ],
+        [
+          14,
+          19
+        ],
+        [
+          14,
+          20
+        ]
+      ]
     },
     "computers": [
       {
         "name": "LUMEN-A",
         "role": "experiment-source",
-        "cores": 2
+        "cores": 2,
+        "chip_codes": [
+          "L-01",
+          "L-03"
+        ]
       },
       {
         "name": "LUMEN-B",
         "role": "experiment-readout",
-        "cores": 2
+        "cores": 2,
+        "chip_codes": [
+          "L-02",
+          "L-04"
+        ]
       }
     ]
   },
@@ -973,6 +1068,14 @@
             1
           ],
           "gate": "weak_measure"
+        },
+        {
+          "slot": [
+            0,
+            0
+          ],
+          "gate": "dephase",
+          "direction": "east"
         }
       ],
       "connected_ports": [
@@ -1038,6 +1141,14 @@
             1
           ],
           "gate": "measure"
+        },
+        {
+          "slot": [
+            0,
+            0
+          ],
+          "gate": "teleport",
+          "direction": "east"
         }
       ],
       "connected_ports": [
