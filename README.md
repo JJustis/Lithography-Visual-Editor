@@ -43,6 +43,8 @@ It also includes **Load Turing Machine** for the tape-based TAPEWEAVE computer:
 python3 lithography_voxel_lab.py --system turing_machine.json
 ```
 
+The File menu also includes **Load SOC-32 Workstation**, a larger equation-and-graphics system. Run it with: python3 lithography_voxel_lab.py --system soc_workstation.json
+
 While the simulator is running, use **File → Load System from File…** or `Ctrl+O` to choose any system JSON. The File menu also contains quick loaders for the neural, quantum, and parallel examples, plus an **Experimental Computers** submenu for topological braid, photonic wavefront, and hybrid quantum machines. Save and Save As are also available.
 
 It uses only Python's standard library and Tkinter. On Debian/Ubuntu, install Tkinter if it is missing:
@@ -134,6 +136,10 @@ The `8bit_computer.json` system runs a deterministic 8-bit CPU mode. It has sixt
 ### Turing-machine computer
 
 The `turing_machine.json` system runs a deterministic single-tape Turing machine. Its JSON `program.turing` section defines the blank symbol, tape, head position, start/accept/reject states, and transition table. Each transition reads one symbol, writes one symbol, moves `L`, `R`, or `N`, and selects the next state. `Ctrl+P` opens the same RUN/STEP/STOP/RESET console; the 512×512 output shows the current tape window, head, state, step count, and accept/reject result.
+
+### SOC-32 equation and graphics workstation
+
+The soc_workstation.json example provides 32 registers, 64K of addressable memory, safe in-program EVAL equations, and a 512x512 drawing surface. Use LOAD32 and STORE32 for wide memory addresses, then CLEAR, PIXEL/PLOT, LINE, RECT, and SHOW to generate graphics from code. The program console's ARCHITECTURE dropdown lets you switch directly between LITHO-ISA, LITHO-8, SOC-32, and TURING examples.
 
 A transition has this shape:
 

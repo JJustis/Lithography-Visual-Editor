@@ -643,12 +643,14 @@ class LabModel:
         self.last_event = "FAB READY // load a pattern"
         self.program_source = ""
         self.program_architecture = "LITHO-ISA"
+        self.program_register_count = 16
         self.program_memory_size = 256
-        self.program_memory_image: List[int] = [0] * self.program_memory_size
-        self.program_memory: List[int] = list(self.program_memory_image)
+        self.program_memory_image: List[float] = [0] * self.program_memory_size
+        self.program_memory: List[float] = list(self.program_memory_image)
         self.program_flags: Dict[str, bool] = {"Z": False, "N": False, "C": False, "V": False}
         self.program_stack_pointer = 0xFF
         self.program_ports: Dict[int, int] = {}
+        self.program_graphics: List[Dict[str, Any]] = []
         self.turing_blank = "_"
         self.turing_start_state = "q0"
         self.turing_state = self.turing_start_state
@@ -662,7 +664,7 @@ class LabModel:
         self.program_instructions: List[Tuple[str, List[str], int, str]] = []
         self.program_labels: Dict[str, int] = {}
         self.program_pc = 0
-        self.program_registers: Dict[str, float] = {f"R{index}": 0.0 for index in range(16)}
+        self.program_registers: Dict[str, float] = {f"R{index}": 0.0 for index in range(self.program_register_count)}
         self.program_running = False
         self.program_halted = False
         self.program_wait = 0
@@ -686,9 +688,17 @@ class LabModel:
             self.program_architecture = "TURING"
         elif architecture in {"8BIT", "8-BIT", "LITHO8", "LITHO-8"}:
             self.program_architecture = "LITHO-8"
+        elif architecture in {"SOC", "SOC-32", "SYSTEM-ON-CHIP", "SYSTEMONCHIP"}:
+            self.program_architecture = "SOC-32"
         else:
             self.program_architecture = "LITHO-ISA"
-        self.program_memory_size = 256 if self.program_architecture == "LITHO-8" else max(1, min(65536, int(program_config.get("memory_size", 256))))
+        self.program_register_count = 32 if self.is_soc else 16
+        if self.is_soc:
+            self.program_memory_size = max(65536, min(1048576, int(program_config.get("memory_size", 65536))))
+        elif self.program_architecture == "LITHO-8":
+            self.program_memory_size = 256
+        else:
+            self.program_memory_size = max(1, min(65536, int(program_config.get("memory_size", 256))))
         self.program_memory_image = [0] * self.program_memory_size
         raw_memory = program_config.get("memory", {})
         if isinstance(raw_memory, dict):
@@ -701,10 +711,12 @@ class LabModel:
             try:
                 address = int(str(raw_address), 0)
                 if 0 <= address < self.program_memory_size:
-                    self.program_memory_image[address] = int(raw_value) & 0xFF
+                    self.program_memory_image[address] = float(raw_value) if self.is_soc else int(raw_value) & 0xFF
             except (TypeError, ValueError):
                 continue
         self.program_memory = list(self.program_memory_image)
+        loaded_graphics = program_config.get("graphics", [])
+        self.program_graphics = [dict(command) for command in loaded_graphics if isinstance(command, dict)] if self.is_soc and isinstance(loaded_graphics, list) else []
         self.program_ports = {}
         raw_ports = program_config.get("ports", {})
         if isinstance(raw_ports, dict):
@@ -878,13 +890,17 @@ class LabModel:
     def is_turing(self) -> bool:
         return self.program_architecture == "TURING"
 
+    @property
+    def is_soc(self) -> bool:
+        return self.program_architecture == "SOC-32"
+
     def _new_program_worker(self, computer: str, name: str, core: int) -> Dict[str, Any]:
         return {
             "computer": computer,
             "name": name,
             "core": core,
             "pc": 0,
-            "registers": {f"R{index}": 0 if self.is_8bit else 0.0 for index in range(16)},
+            "registers": {f"R{index}": 0 if self.is_8bit else 0.0 for index in range(self.program_register_count)},
             "memory": list(self.program_memory_image),
             "flags": {"Z": False, "N": False, "C": False, "V": False},
             "sp": 0xFF,
@@ -893,6 +909,7 @@ class LabModel:
             "tm_head": self.turing_head,
             "tm_state": self.turing_start_state,
             "tm_steps": 0,
+            "graphics": [],
             "running": False,
             "halted": False,
             "wait": 0,
@@ -924,6 +941,7 @@ class LabModel:
             "tm_head": self.turing_head,
             "tm_state": self.turing_state,
             "tm_steps": self.turing_steps,
+            "graphics": list(self.program_graphics),
             "output": list(self.program_output),
             "error": self.program_error,
         })
@@ -944,7 +962,8 @@ class LabModel:
         self.program_clock = int(worker["clock"])
         self.program_bus_value = float(worker["bus_value"])
         self.program_input_value = float(worker["input_value"])
-        self.program_memory = [int(value) & 0xFF for value in worker.get("memory", self.program_memory_image)]
+        raw_worker_memory = worker.get("memory", self.program_memory_image)
+        self.program_memory = [int(value) & 0xFF for value in raw_worker_memory] if self.is_8bit else list(raw_worker_memory)
         self.program_flags = {name: bool(worker.get("flags", {}).get(name, False)) for name in ("Z", "N", "C", "V")}
         self.program_stack_pointer = int(worker.get("sp", 0xFF)) & 0xFF
         self.program_ports = {int(address): int(value) & 0xFF for address, value in worker.get("ports", {}).items()}
@@ -952,6 +971,7 @@ class LabModel:
         self.turing_head = int(worker.get("tm_head", self.turing_head))
         self.turing_state = str(worker.get("tm_state", self.turing_start_state))
         self.turing_steps = int(worker.get("tm_steps", 0))
+        self.program_graphics = list(worker.get("graphics", []))
         self.program_output = list(worker["output"])
         self.program_error = str(worker["error"])
 
@@ -1012,7 +1032,7 @@ class LabModel:
     def _program_register(self, token: str) -> str:
         register = str(token).upper().lstrip("$")
         if register not in self.program_registers:
-            raise ValueError(f"unknown register {token}; use R0-R15")
+            raise ValueError(f"unknown register {token}; use R0-R{self.program_register_count - 1}")
         return register
 
     def _program_value(self, token: str) -> float:
@@ -1028,6 +1048,45 @@ class LabModel:
 
     def _program_address(self, token: str) -> int:
         return int(self._program_value(token)) & 0xFF
+
+    def _program_wide_address(self, token: str) -> int:
+        return max(0, min(self.program_memory_size - 1, int(self._program_value(token))))
+
+    def _program_graphics_value(self, token: str) -> float:
+        return min(1.0, max(0.0, self._program_value(token)))
+
+    def _program_eval_expression(self, expression: str) -> float:
+        normalized = str(expression).replace("^", "**")
+        environment: Dict[str, Any] = {
+            **self.program_registers,
+            **{name.lower(): value for name, value in self.program_registers.items()},
+            "pi": math.pi,
+            "e": math.e,
+            "abs": abs,
+            "cos": math.cos,
+            "exp": math.exp,
+            "log": math.log,
+            "max": max,
+            "min": min,
+            "sin": math.sin,
+            "sqrt": math.sqrt,
+            "tan": math.tan,
+        }
+        tree = ast.parse(normalized, mode="eval")
+        allowed = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow, ast.Mod, ast.USub, ast.UAdd, ast.Constant, ast.Name, ast.Call, ast.Load)
+        for node in ast.walk(tree):
+            if not isinstance(node, allowed):
+                raise ValueError("unsupported equation syntax")
+            if isinstance(node, ast.Constant) and not isinstance(node.value, (int, float)):
+                raise ValueError("equations accept numeric constants only")
+            if isinstance(node, ast.Name) and node.id not in environment:
+                raise ValueError(f"unknown equation symbol {node.id}")
+            if isinstance(node, ast.Call) and (not isinstance(node.func, ast.Name) or node.func.id not in environment or not callable(environment[node.func.id])):
+                raise ValueError("equation function is not allowed")
+        result = eval(compile(tree, "<soc-equation>", "eval"), {"__builtins__": {}}, environment)
+        if not isinstance(result, (int, float)) or not math.isfinite(float(result)):
+            raise ValueError("equation result is not finite")
+        return float(result)
 
     def _program_set_register(self, register: str, value: float, update_flags: bool = False) -> int | float:
         if not self.is_8bit:
@@ -1066,6 +1125,7 @@ class LabModel:
             "IMM8", "MOV8", "LOAD8", "STORE8", "ADD8", "SUB8", "AND8", "OR8", "XOR8",
             "NOT8", "INC8", "DEC8", "SHL8", "SHR8", "CMP8", "PUSH8", "POP8",
             "IN8", "OUT8", "JZ8", "JNZ8", "JC8", "JNC8", "CALL", "RET",
+            "LOAD32", "STORE32", "EVAL", "CLEAR", "PIXEL", "PLOT", "LINE", "RECT", "SHOW",
         }
         for line_number, original in enumerate(str(source).splitlines(), 1):
             line = original.strip()
@@ -1118,7 +1178,7 @@ class LabModel:
 
     def reset_program(self, announce: bool = True) -> None:
         self.program_pc = 0
-        self.program_registers = {f"R{index}": 0.0 for index in range(16)}
+        self.program_registers = {f"R{index}": 0 if self.is_8bit else 0.0 for index in range(self.program_register_count)}
         self.program_running = False
         self.program_halted = False
         self.program_wait = 0
@@ -1129,6 +1189,7 @@ class LabModel:
         self.program_flags = {"Z": False, "N": False, "C": False, "V": False}
         self.program_stack_pointer = 0xFF
         self.program_ports = {}
+        self.program_graphics = []
         self.turing_tape = dict(self.turing_tape_image)
         self.turing_head = int(self.turing_head)
         self.turing_state = self.turing_start_state
@@ -1258,6 +1319,68 @@ class LabModel:
         try:
             if opcode == "NOP":
                 pass
+            elif opcode == "LOAD32":
+                if len(args) != 2:
+                    raise ValueError("LOAD32 needs DEST ADDRESS")
+                value = self.program_memory[self._program_wide_address(args[1])]
+                self._program_set_register(self._program_register(args[0]), float(value))
+            elif opcode == "STORE32":
+                if len(args) != 2:
+                    raise ValueError("STORE32 needs ADDRESS SOURCE")
+                self.program_memory[self._program_wide_address(args[0])] = float(self._program_value(args[1]))
+            elif opcode == "EVAL":
+                if len(args) < 2:
+                    raise ValueError("EVAL needs DEST EXPRESSION")
+                destination = self._program_register(args[0])
+                result = self._program_eval_expression(" ".join(args[1:]))
+                self._program_set_register(destination, result)
+                self.program_output.append(f"EQ {destination} = {result:0.6f}")
+                self.program_output = self.program_output[-12:]
+                self.last_event = f"SOC EQUATION // {destination} = {result:0.6f}"
+            elif opcode == "CLEAR":
+                if len(args) > 1:
+                    raise ValueError("CLEAR needs optional VALUE")
+                value = self._program_graphics_value(args[0]) if args else 0.0
+                self.program_graphics = [{"op": "clear", "value": value}]
+                self.last_event = "SOC GRAPHICS // framebuffer cleared"
+            elif opcode in {"PIXEL", "PLOT"}:
+                if len(args) != 3:
+                    raise ValueError(f"{opcode} needs X Y VALUE")
+                self.program_graphics.append({
+                    "op": "pixel",
+                    "x": max(0, min(511, int(round(self._program_value(args[0]))))),
+                    "y": max(0, min(511, int(round(self._program_value(args[1]))))),
+                    "value": self._program_graphics_value(args[2]),
+                })
+                self.program_graphics = self.program_graphics[-2048:]
+            elif opcode == "LINE":
+                if len(args) != 5:
+                    raise ValueError("LINE needs X1 Y1 X2 Y2 VALUE")
+                self.program_graphics.append({
+                    "op": "line",
+                    "x1": max(0, min(511, int(round(self._program_value(args[0]))))),
+                    "y1": max(0, min(511, int(round(self._program_value(args[1]))))),
+                    "x2": max(0, min(511, int(round(self._program_value(args[2]))))),
+                    "y2": max(0, min(511, int(round(self._program_value(args[3]))))),
+                    "value": self._program_graphics_value(args[4]),
+                })
+                self.program_graphics = self.program_graphics[-2048:]
+            elif opcode == "RECT":
+                if len(args) != 5:
+                    raise ValueError("RECT needs X Y WIDTH HEIGHT VALUE")
+                self.program_graphics.append({
+                    "op": "rect",
+                    "x": max(0, min(511, int(round(self._program_value(args[0]))))),
+                    "y": max(0, min(511, int(round(self._program_value(args[1]))))),
+                    "width": max(1, min(511, int(round(self._program_value(args[2]))))),
+                    "height": max(1, min(511, int(round(self._program_value(args[3]))))),
+                    "value": self._program_graphics_value(args[4]),
+                })
+                self.program_graphics = self.program_graphics[-2048:]
+            elif opcode == "SHOW":
+                if args:
+                    raise ValueError("SHOW takes no arguments")
+                self.last_event = f"SOC GRAPHICS // {len(self.program_graphics)} drawing commands on screen"
             elif opcode in {"CONST", "SET"}:
                 if len(args) != 2:
                     raise ValueError(f"{opcode} needs DEST VALUE")
@@ -1554,7 +1677,7 @@ class LabModel:
             elif opcode == "HALT":
                 self.program_halted = True
                 self.program_running = False
-                self.last_event = "PROGRAM HALT // instruction requested"
+                self.last_event = f"SOC GRAPHICS // {len(self.program_graphics)} commands // PROGRAM HALT" if self.is_soc else "PROGRAM HALT // instruction requested"
             else:
                 raise ValueError(f"unsupported opcode {opcode}")
         except (ValueError, ZeroDivisionError) as exc:
@@ -1624,6 +1747,9 @@ class LabModel:
         if self.is_turing:
             tape_window = "".join(self.turing_tape.get(position, self.turing_blank) for position in range(self.turing_head - 8, self.turing_head + 9))
             return f"{state} TURING STATE={self.turing_state} HEAD={self.turing_head:+04d} STEPS={self.turing_steps:04d} SPEED={self.program_speed:03d}{cluster} TAPE[{tape_window}] OUT {output[:18]}"
+        if self.is_soc:
+            register_summary = " ".join(f"R{index}={float(self.program_registers[f'R{index}']):0.3f}" for index in range(4))
+            return f"{state} SOC-32 PC {self.program_pc:03d}/{len(self.program_instructions):03d}  SPEED {self.program_speed:03d}  MEM {self.program_memory_size // 1024}K  GFX {len(self.program_graphics):04d}  {register_summary}{cluster}  OUT {output[:20]}"
         if self.is_8bit:
             register_summary = " ".join(f"R{index}={int(self.program_registers[f'R{index}']) & 0xFF:02X}" for index in range(4))
             flags = "".join(name if self.program_flags.get(name, False) else "-" for name in ("Z", "N", "C", "V"))
@@ -1881,7 +2007,7 @@ class LabModel:
         data["equations"] = list(self.equations)
         data["equation_proposals"] = list(self.equation_proposals)
         data["program"] = {
-            "language": "TURING-MACHINE" if self.is_turing else "LITHO-8" if self.is_8bit else "LITHO-ISA",
+            "language": "TURING-MACHINE" if self.is_turing else "SOC-32" if self.is_soc else "LITHO-8" if self.is_8bit else "LITHO-ISA",
             "architecture": self.program_architecture,
             "auto_start": bool(self.program_running),
             "speed": self.program_speed,
@@ -1891,6 +2017,14 @@ class LabModel:
             data["program"]["memory_size"] = self.program_memory_size
             data["program"]["memory"] = list(self.program_memory)
             data["program"]["ports"] = {str(address): value for address, value in self.program_ports.items()}
+        elif self.is_soc:
+            data["program"]["memory_size"] = self.program_memory_size
+            data["program"]["memory"] = {
+                str(address): value
+                for address, value in enumerate(self.program_memory)
+                if value not in (0, 0.0)
+            }
+            data["program"]["graphics"] = list(self.program_graphics)
         elif self.is_turing:
             data["program"]["turing"] = {
                 "blank": self.turing_blank,
@@ -2203,6 +2337,7 @@ class LithoLab:
         self.file_menu.add_command(label="Load Quantum Example", command=lambda: self.load_system_path(Path(__file__).with_name("quantum_system.json")))
         self.file_menu.add_command(label="Load Parallel Example", command=lambda: self.load_system_path(Path(__file__).with_name("parallel_system.json")))
         self.file_menu.add_command(label="Load 8-bit Computer", command=lambda: self.load_system_path(Path(__file__).with_name("8bit_computer.json")))
+        self.file_menu.add_command(label="Load SOC-32 Workstation", command=lambda: self.load_system_path(Path(__file__).with_name("soc_workstation.json")))
         self.file_menu.add_command(label="Load Turing Machine", command=lambda: self.load_system_path(Path(__file__).with_name("turing_machine.json")))
         self.experimental_menu = tk.Menu(self.file_menu, tearoff=False, bg="#0d1c26", fg=self.TEXT, activebackground="#2d5c68", activeforeground="#ffffff")
         self.experimental_menu.add_command(label="Topological Braid Computer", command=lambda: self.load_system_path(Path(__file__).with_name("experimental_topological.json")))
@@ -2220,6 +2355,7 @@ class LithoLab:
         self.file_menu.add_command(label="Exit", command=self.root.destroy)
         self.root.config(menu=self.file_menu)
         self.program_editor_window: Optional[tk.Toplevel] = None
+        self.program_architecture_var: Optional[tk.StringVar] = None
         self.program_text_widget: Optional[tk.Text] = None
         self.program_editor_status: Optional[tk.Label] = None
         self.equation_window: Optional[tk.Toplevel] = None
@@ -3041,6 +3177,9 @@ class LithoLab:
             flags = "".join(name if self.model.program_flags.get(name, False) else "-" for name in ("Z", "N", "C", "V"))
             registers = " ".join(f"R{index}:{int(self.model.program_registers[f'R{index}']) & 0xFF:02X}" for index in range(4))
             text(22, 130, f"LITHO-8 // {registers} // FLAGS {flags} // SP {self.model.program_stack_pointer:02X}"[:72], fill="#ffe76b", size=7, bold=True)
+        elif self.model.is_soc:
+            registers = " ".join(f"R{index}:{float(self.model.program_registers[f'R{index}']):0.2f}" for index in range(4))
+            text(22, 130, f"SOC-32 // 64K RAM // GFX {len(self.model.program_graphics):04d} // {registers}"[:72], fill="#ffe76b", size=7, bold=True)
         elif self.model.is_turing:
             tape_window = "".join(self.model.turing_tape.get(position, self.model.turing_blank) for position in range(self.model.turing_head - 8, self.model.turing_head + 9))
             text(22, 130, f"TURING // STATE {self.model.turing_state} // HEAD {self.model.turing_head:+04d} // STEPS {self.model.turing_steps:04d} // [{tape_window}]"[:72], fill="#ffe76b", size=7, bold=True)
@@ -3054,7 +3193,9 @@ class LithoLab:
 
         graph_left, graph_top, graph_right, graph_bottom = 22, 139, 490, 314
         c.create_rectangle(graph_left, graph_top, graph_right, graph_bottom, fill="#031018", outline="#1c5962")
-        text(graph_left + 10, graph_top + 9, "BUS CARRIER // LIVE GRAPHICAL OUTPUT", fill="#83cfd3", size=8, bold=True)
+        graphics_active = self.model.is_soc and bool(self.model.program_graphics)
+        graph_title = "SOC GRAPHICS // CODE-GENERATED OUTPUT" if graphics_active else "BUS CARRIER // LIVE GRAPHICAL OUTPUT"
+        text(graph_left + 10, graph_top + 9, graph_title, fill="#83cfd3", size=8, bold=True)
         for grid in range(1, 5):
             gy = graph_top + 34 + grid * (graph_bottom - graph_top - 54) / 5
             line(graph_left + 8, gy, graph_right - 8, gy, fill="#12313b", dash=(2, 4))
@@ -3063,26 +3204,55 @@ class LithoLab:
             line(gx, graph_top + 28, gx, graph_bottom - 12, fill="#0d2730", dash=(2, 4))
         plot_left, plot_right = graph_left + 10, graph_right - 10
         plot_top, plot_bottom = graph_top + 32, graph_bottom - 15
-        points: List[float] = []
-        for index in range(120):
-            px = plot_left + index * (plot_right - plot_left) / 119
-            signal = math.sin(self.frame / 6.0 + index * 0.30) * (0.20 + health * 0.22)
-            signal += math.sin(self.frame / 17.0 + index * 0.09) * 0.10
-            py = (plot_top + plot_bottom) / 2 - signal * (plot_bottom - plot_top)
-            points.extend((px, py))
-        c.create_line(*points, fill=self.GREEN if health > 0.46 else self.RED, width=2, smooth=True)
-        line(plot_left, (plot_top + plot_bottom) / 2, plot_right, (plot_top + plot_bottom) / 2, fill="#1e4b53")
-        for lane, layer in enumerate(sorted(self.model.layer_bus_cells)[:4]):
-            lane_y = graph_bottom - 24 - lane * 18
-            line(plot_left, lane_y, plot_right, lane_y, fill="#16424b")
-            text(plot_left + 3, lane_y - 7, f"L{layer}", fill="#5e9da4", size=6, bold=True)
-            packet = self.bus_packet_state(self.model.layer_bus_cells.get(layer, []))
-            if packet is not None:
-                _, _, fraction, direction, hop, hops = packet
-                particle_x = plot_left + ((hop + fraction) / max(1, hops)) * (plot_right - plot_left)
-                arrow = {"east": ">", "west": "<", "north": "^", "south": "v", "northeast": "^>", "northwest": "^<", "southeast": "v>", "southwest": "v<"}.get(direction, "·")
-                c.create_oval(particle_x - 5, lane_y - 5, particle_x + 5, lane_y + 5, fill="#ffe76b", outline="#ffffff")
-                text(particle_x, lane_y, arrow, fill="#071118", size=7, bold=True, anchor="center")
+        if graphics_active:
+            palette = ("#17313b", "#2de2e6", "#6ceda5", "#ffe76b", "#f07076", "#d6a7ff")
+            def graphic_color(value: Any) -> str:
+                try:
+                    numeric = min(1.0, max(0.0, float(value)))
+                except (TypeError, ValueError):
+                    numeric = 0.5
+                return palette[min(len(palette) - 1, int(numeric * len(palette)))]
+            def gx(value: Any) -> float:
+                return plot_left + max(0.0, min(511.0, float(value))) / 511.0 * (plot_right - plot_left)
+            def gy(value: Any) -> float:
+                return plot_top + max(0.0, min(511.0, float(value))) / 511.0 * (plot_bottom - plot_top)
+            for command in self.model.program_graphics:
+                op = command.get("op")
+                color = graphic_color(command.get("value", 0.5))
+                if op == "clear":
+                    c.create_rectangle(plot_left, plot_top, plot_right, plot_bottom, fill=color, outline="")
+                elif op == "pixel":
+                    px, py = gx(command.get("x", 0)), gy(command.get("y", 0))
+                    c.create_rectangle(px, py, px + 2, py + 2, fill=color, outline="")
+                elif op == "line":
+                    c.create_line(gx(command.get("x1", 0)), gy(command.get("y1", 0)), gx(command.get("x2", 0)), gy(command.get("y2", 0)), fill=color, width=2)
+                elif op == "rect":
+                    left, top = gx(command.get("x", 0)), gy(command.get("y", 0))
+                    right = gx(float(command.get("x", 0)) + float(command.get("width", 1)))
+                    bottom = gy(float(command.get("y", 0)) + float(command.get("height", 1)))
+                    c.create_rectangle(left, top, right, bottom, outline=color, width=2)
+        else:
+            points: List[float] = []
+            for index in range(120):
+                px = plot_left + index * (plot_right - plot_left) / 119
+                signal = math.sin(self.frame / 6.0 + index * 0.30) * (0.20 + health * 0.22)
+                signal += math.sin(self.frame / 17.0 + index * 0.09) * 0.10
+                py = (plot_top + plot_bottom) / 2 - signal * (plot_bottom - plot_top)
+                points.extend((px, py))
+            c.create_line(*points, fill=self.GREEN if health > 0.46 else self.RED, width=2, smooth=True)
+            line(plot_left, (plot_top + plot_bottom) / 2, plot_right, (plot_top + plot_bottom) / 2, fill="#1e4b53")
+        if not graphics_active:
+            for lane, layer in enumerate(sorted(self.model.layer_bus_cells)[:4]):
+                lane_y = graph_bottom - 24 - lane * 18
+                line(plot_left, lane_y, plot_right, lane_y, fill="#16424b")
+                text(plot_left + 3, lane_y - 7, f"L{layer}", fill="#5e9da4", size=6, bold=True)
+                packet = self.bus_packet_state(self.model.layer_bus_cells.get(layer, []))
+                if packet is not None:
+                    _, _, fraction, direction, hop, hops = packet
+                    particle_x = plot_left + ((hop + fraction) / max(1, hops)) * (plot_right - plot_left)
+                    arrow = {"east": ">", "west": "<", "north": "^", "south": "v", "northeast": "^>", "northwest": "^<", "southeast": "v>", "southwest": "v<"}.get(direction, "·")
+                    c.create_oval(particle_x - 5, lane_y - 5, particle_x + 5, lane_y + 5, fill="#ffe76b", outline="#ffffff")
+                    text(particle_x, lane_y, arrow, fill="#071118", size=7, bold=True, anchor="center")
 
         text(22, 333, "CHIP OUTPUT CHANNELS", fill="#83cfd3", size=8, bold=True)
         channel_left, channel_top = 22, 352
@@ -3805,6 +3975,24 @@ class LithoLab:
         self.equation_proposal_list = None
         self.equation_status = None
 
+    def select_program_architecture(self, architecture: str) -> None:
+        architecture = str(architecture).upper()
+        paths = {
+            "LITHO-ISA": Path(__file__).with_name("example_system.json"),
+            "LITHO-8": Path(__file__).with_name("8bit_computer.json"),
+            "SOC-32": Path(__file__).with_name("soc_workstation.json"),
+            "TURING": Path(__file__).with_name("turing_machine.json"),
+        }
+        selected = paths.get(architecture)
+        if selected is None or not selected.exists():
+            if self.program_architecture_var is not None:
+                self.program_architecture_var.set(self.model.program_architecture)
+            messagebox.showerror("Architecture", f"No example system is available for {architecture} yet.", parent=self.program_editor_window)
+            return
+        self.load_system_path(selected)
+        self.model.last_event = f"ARCHITECTURE LOAD // {self.model.program_architecture} // {selected.name}"
+        self.update_program_editor_status()
+
     def update_program_editor_status(self) -> None:
         if self.program_editor_status is not None and self.program_editor_status.winfo_exists():
             self.program_editor_status.configure(text=self.model.program_status())
@@ -3937,6 +4125,12 @@ class LithoLab:
 
         button_row = tk.Frame(window, bg=self.PANEL)
         button_row.pack(fill="x", padx=14, pady=(2, 4))
+        self.program_architecture_var = tk.StringVar(window, value=self.model.program_architecture)
+        tk.Label(button_row, text="ARCHITECTURE", bg=self.PANEL, fg=self.MUTED, font=("TkFixedFont", 8, "bold")).pack(side="left", padx=(0, 5))
+        architecture_menu = tk.OptionMenu(button_row, self.program_architecture_var, "LITHO-ISA", "LITHO-8", "SOC-32", "TURING", command=self.select_program_architecture)
+        architecture_menu.configure(bg="#15313b", fg=self.TEXT, activebackground="#2d5c68", activeforeground="#ffffff", highlightthickness=0, relief="flat", font=("TkFixedFont", 8, "bold"))
+        architecture_menu["menu"].configure(bg="#0d1c26", fg=self.TEXT, activebackground="#2d5c68", activeforeground="#ffffff", font=("TkFixedFont", 8))
+        architecture_menu.pack(side="left", padx=(0, 10))
         button_style = {"bg": "#15313b", "fg": self.TEXT, "activebackground": "#2d5c68", "activeforeground": "#ffffff", "relief": "flat", "font": ("TkFixedFont", 8, "bold"), "padx": 10}
         for label, command in (
             ("RUN", self.program_editor_run),
@@ -3963,6 +4157,7 @@ class LithoLab:
         if self.program_editor_window is not None and self.program_editor_window.winfo_exists():
             self.program_editor_window.destroy()
         self.program_editor_window = None
+        self.program_architecture_var = None
         self.program_text_widget = None
         self.program_editor_status = None
 
@@ -3990,6 +4185,8 @@ class LithoLab:
             self.save_path = filename.with_name("savegame.json")
             self.program_speed_var.set(self.model.program_speed)
             self.compute_speed_value.configure(text=f"{self.model.program_speed:03d} INST/TICK")
+            if self.program_architecture_var is not None:
+                self.program_architecture_var.set(self.model.program_architecture)
             if self.program_text_widget is not None and self.program_text_widget.winfo_exists():
                 self.program_text_widget.delete("1.0", "end")
                 self.program_text_widget.insert("1.0", self.model.program_source)
